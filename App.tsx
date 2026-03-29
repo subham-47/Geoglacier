@@ -89,7 +89,7 @@ export default function App() {
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="max-w-xl p-8 md:p-12 bg-slate-950/40 backdrop-blur-xl border border-white/5 rounded-3xl shadow-2xl"
+              className="max-w-xl p-8 md:p-12 bg-gradient-to-b from-slate-900/30 to-transparent backdrop-blur-md border border-white/10 rounded-3xl shadow-2xl"
             >
               <span className={cn("font-mono text-[10px] uppercase tracking-[0.4em] mb-4 block", phase.color)}>
                 {phase.tag}
