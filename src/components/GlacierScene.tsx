@@ -346,3 +346,5 @@ animate();
     </div>
   );
 };
+// Add this at the very end of the file
+export default GlacierScene;
