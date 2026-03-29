@@ -125,10 +125,26 @@ const fragmentShader = `
     if(vElevation > 1.8) mtnColor = mix(mtnColor, vec3(0.9, 0.9, 0.9), (vElevation - 1.8) * 2.0);
 
     vec3 volColor = mix(vec3(0.1, 0.05, 0.02), vec3(0.3, 0.2, 0.15), smoothstep(-0.5, 2.0, vElevation));
-    if(vElevation > 1.8) {
-        float glow = sin(uTime * 2.0 + vElevation * 10.0) * 0.5 + 0.5;
-        volColor = mix(volColor, vec3(1.0, 0.2, 0.0), glow * smoothstep(1.8, 2.2, vElevation));
-    }
+    if(vElevation > 1.2) {
+
+    // 🌋 flowing lava pattern
+    float flow = sin(vPosition.x * 8.0 + uTime * 2.5) * 0.5 + 0.5;
+    flow *= sin(vPosition.z * 8.0 + uTime * 2.0) * 0.5 + 0.5;
+
+    // restrict to cracks
+    float cracks = smoothstep(1.2, 2.2, vElevation);
+
+    float lavaMask = flow * cracks;
+
+    // glowing lava color
+    vec3 lavaColor = vec3(1.5, 0.4, 0.0) * lavaMask;
+
+    // animate brightness
+    lavaColor *= (0.6 + 0.4 * sin(uTime * 4.0));
+
+    // mix with volcano surface
+    volColor = mix(volColor, lavaColor, lavaMask * 0.8);
+}
 
     vec3 finalColor;
     if(uPhase <= 1.0) {
@@ -137,8 +153,13 @@ const fragmentShader = `
         finalColor = mix(mtnColor, volColor, uPhase - 1.0);
     }
 
-    finalColor += fresnel * 0.3;
+    finalColor += fresnel * 0.6;
     finalColor *= (diff * 0.8 + 0.2);
+    
+    // 🔥 lava emission boost
+if(uPhase > 1.5){
+  finalColor += vec3(0.8, 0.2, 0.0) * smoothstep(1.2, 2.2, vElevation) * 0.6;
+}
 
     gl_FragColor = vec4(finalColor, 1.0);
   }
@@ -156,10 +177,16 @@ export const GlacierScene: React.FC<GlacierSceneProps> = ({ onPhaseUpdate }) => 
     if (!canvasRef.current) return;
 
     const renderer = new THREE.WebGLRenderer({
-      canvas: canvasRef.current,
-      antialias: true,
-      alpha: true,
-    });
+  canvas: canvasRef.current,
+  antialias: true,
+  alpha: true,
+});
+
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.4;
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -180,6 +207,51 @@ export const GlacierScene: React.FC<GlacierSceneProps> = ({ onPhaseUpdate }) => 
 
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
+
+    // 🌊 Water base (iceberg effect)
+const waterGeometry = new THREE.CylinderGeometry(3, 3, 2, 64);
+
+const waterMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0x1e3a8a,
+  transparent: true,
+  opacity: 0.35,
+  roughness: 0.3,
+  metalness: 0.1,
+});
+
+const water = new THREE.Mesh(waterGeometry, waterMaterial);
+water.position.y = -1.5;
+
+scene.add(water);
+
+    // 🌲 Trees (instanced for performance)
+const treeCount = 200;
+
+const treeGeometry = new THREE.ConeGeometry(0.05, 0.2, 6);
+const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x1f7a1f });
+
+const trees = new THREE.InstancedMesh(treeGeometry, treeMaterial, treeCount);
+
+const dummy = new THREE.Object3D();
+
+for (let i = 0; i < treeCount; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 1.2 + Math.random() * 0.6;
+
+  const x = Math.cos(angle) * radius;
+  const z = Math.sin(angle) * radius;
+
+  // place slightly above surface
+  const y = Math.random() * 0.3 - 0.2;
+
+  dummy.position.set(x, y, z);
+  dummy.scale.setScalar(0.8 + Math.random() * 0.6);
+
+  dummy.updateMatrix();
+  trees.setMatrixAt(i, dummy.matrix);
+}
+
+scene.add(trees);
 
     // Particles
     const particlesCount = 1000;
@@ -221,10 +293,57 @@ export const GlacierScene: React.FC<GlacierSceneProps> = ({ onPhaseUpdate }) => 
       end: 'bottom bottom',
       scrub: true,
       onUpdate: (self) => {
-        const p = self.progress * 2;
-        material.uniforms.uPhase.value = p;
-        mesh.rotation.y = self.progress * Math.PI * 4;
-        onPhaseUpdate(p);
+  const p = self.progress * 2;
+
+  material.uniforms.uPhase.value = p;
+  mesh.rotation.y = self.progress * Math.PI * 4;
+  onPhaseUpdate(p);
+
+  // 🌊 Iceberg water visibility (ADD HERE)
+  if (p < 0.8) {
+    water.visible = true;
+  } else {
+    water.visible = false;
+  }
+
+  // Update particle colors based on phase
+  if (p < 0.5) {
+    particlesMaterial.color.set(0xffffff);
+  } else if (p < 1.5) {
+    particlesMaterial.color.set(0x4ade80);
+  } else {
+    particlesMaterial.color.set(0xff4400);
+  }
+}
+
+        // 🌲 Trees visibility (ADD HERE)
+  if (p > 0.5 && p < 1.5) {
+    trees.visible = true;
+  } else {
+    trees.visible = false;
+  }
+
+  // 🌊 Water visibility
+  if (p < 0.8) {
+    water.visible = true;
+  } else {
+    water.visible = false;
+  }
+
+  water.material.opacity = Math.max(0, 1 - p);
+
+    // 🌊 Smooth fade (ADD THIS HERE)
+  water.material.opacity = Math.max(0, 1 - p * 0.8);
+
+  // Particle colors
+  if (p < 0.5) {
+    particlesMaterial.color.set(0xffffff);
+  } else if (p < 1.5) {
+    particlesMaterial.color.set(0x4ade80);
+  } else {
+    particlesMaterial.color.set(0xff4400);
+  }
+}
         
         // Update particle colors based on phase
         if (p < 0.5) {
@@ -238,14 +357,32 @@ export const GlacierScene: React.FC<GlacierSceneProps> = ({ onPhaseUpdate }) => 
     });
 
     const animate = () => {
-      const elapsedTime = clock.getElapsedTime();
-      material.uniforms.uTime.value = elapsedTime;
-      particlesMesh.rotation.y = elapsedTime * 0.05;
-      particlesMesh.position.y = Math.sin(elapsedTime * 0.2) * 0.5;
-      
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    };
+  const elapsedTime = clock.getElapsedTime();
+
+  material.uniforms.uTime.value = elapsedTime;
+
+  // 🌊 ADD HERE (water animation)
+  water.rotation.y = elapsedTime * 0.05;
+  water.position.y = -1.5 + Math.sin(elapsedTime * 1.5) * 0.05;
+
+  particlesMaterial.opacity = 0.4 + Math.sin(elapsedTime * 5) * 0.2;
+
+  particlesMesh.rotation.y = elapsedTime * 0.05;
+  particlesMesh.position.y = Math.sin(elapsedTime * 0.2) * 0.5;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+};
+
+  // 🔥 ADD THIS LINE HERE
+  particlesMaterial.opacity = 0.4 + Math.sin(elapsedTime * 5) * 0.2;
+
+  particlesMesh.rotation.y = elapsedTime * 0.05;
+  particlesMesh.position.y = Math.sin(elapsedTime * 0.2) * 0.5;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+};
 
     animate();
 
