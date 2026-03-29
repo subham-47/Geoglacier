@@ -110,10 +110,11 @@ const vertexShader = `
     } else {
         finalPos = mix(mtnPos, volPos, uPhase - 1.0);
     }
-    `;
 
     vElevation = finalPos.y;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPos, 1.0);
+    }
+    ';
 
 const fragmentShader = `
   uniform float uTime;
