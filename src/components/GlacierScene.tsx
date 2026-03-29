@@ -114,7 +114,7 @@ const vertexShader = `
     vElevation = finalPos.y;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPos, 1.0);
     }
-    ';
+    `;
 
 const fragmentShader = `
   uniform float uTime;
