@@ -72,13 +72,22 @@ const vertexShader = `
     float n = snoise(position * 1.5 + uTime * 0.1);
     vNoise = n;
 
+    // --- NEW ICE GEOMETRY START ---
     vec3 icePos = position;
-    float iceHeight = snoise(position * 2.0) * 0.2;
-    if(position.y > 0.1) {
-        icePos *= (0.8 + iceHeight);
+    float baseNoise = snoise(position * 1.5) * 0.15;
+    float sharpNoise = 1.0 - abs(snoise(position * 3.5));
+    sharpNoise = pow(sharpNoise, 3.0); 
+    float terrace = step(0.5, fract(position.y * 5.0)) * 0.03;
+
+    if(position.y > 0.05) {
+        icePos *= (0.8 + baseNoise + sharpNoise * 0.15 - terrace);
+        if(icePos.y > 1.1) {
+            icePos.y = mix(icePos.y, 1.1 + snoise(position * 10.0) * 0.02, 0.7);
+        }
     } else {
-        icePos *= (1.2 - iceHeight);
+        icePos *= (1.2 - baseNoise);
     }
+    // --- NEW ICE GEOMETRY END ---
 
     vec3 mtnPos = position;
     float mtnHeight = pow(max(0.0, (position.y + 1.0) / 2.0), 0.6) * 2.5;
@@ -104,8 +113,6 @@ const vertexShader = `
 
     vElevation = finalPos.y;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPos, 1.0);
-  }
-`;
 
 const fragmentShader = `
   uniform float uTime;
