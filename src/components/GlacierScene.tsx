@@ -377,113 +377,84 @@ scene.add(water);
     // ... your trigger setup ...
 
     ScrollTrigger.create({
-  trigger: '#scroll-container',
-  start: 'top top',
-  end: 'bottom bottom',
-  scrub: true,
-  onUpdate: (self) => {
-    const p = self.progress * 2;
+      trigger: '#scroll-container',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: true,
+      onUpdate: (self) => {
+        const p = self.progress * 2;
 
-    // 1. Lava Fountain Timing
-    targetFountainTime = Math.max(0, (p - 1.2) * 6); 
-    
-    // 2. Phase and Rotation
-    material.uniforms.uPhase.value = p;
-    mesh.rotation.y = self.progress * Math.PI * 4;
-    onPhaseUpdate(p);
-
-    // --- 🌲 SYNCHRONIZED TREE GROWTH & SMOOTH FADE ---
-    // REDUCED SPREAD: Changed from 2.5 to 0.95 so they stick to the mountain slopes!
-    const spreadMultiplier = 1.0 + (Math.max(0, p - 0.4) * 0.5); 
-
-    if (p > 0.35) { 
-      // 1. Update Tree Positions
-      for (let i = 0; i < treeCount; i++) {
-        const angle = treeAngles[i];
-        const r = treeRadii[i] * spreadMultiplier;
+        // 1. Lava Fountain Timing
+        targetFountainTime = Math.max(0, (p - 1.2) * 6); 
         
-        const x = Math.cos(angle) * r;
-        const z = Math.sin(angle) * r;
-        
-        // Gentle lift to keep them out of the ground
-        const y = -0.2 + (Math.max(0, p - 0.4) * 0.25); 
+        // 2. Phase and Rotation
+        material.uniforms.uPhase.value = p;
+        mesh.rotation.y = self.progress * Math.PI * 4;
+        onPhaseUpdate(p);
 
-        dummy.position.set(x, y, z);
-        dummy.rotation.set(0, -angle, 0); 
-        dummy.updateMatrix();
-        trees.setMatrixAt(i, dummy.matrix);
-      }
-      trees.instanceMatrix.needsUpdate = true;
+        // --- 🌲 SYNCHRONIZED TREE GROWTH & SMOOTH FADE ---
+        const spreadMultiplier = 1.0 + (Math.max(0, p - 0.4) * 0.45); 
 
-      // --- 🌲 SYNCHRONIZED TREE GROWTH & SMOOTH FADE ---
-    // Tighter spread to keep them on the mountain
-    const spreadMultiplier = 1.0 + (Math.max(0, p - 0.4) * 0.45); 
+        if (p > 0.35) { 
+          // Update Tree Positions
+          for (let i = 0; i < treeCount; i++) {
+            const angle = treeAngles[i];
+            const r = treeRadii[i] * spreadMultiplier;
+            const x = Math.cos(angle) * r;
+            const z = Math.sin(angle) * r;
+            const y = -0.2 + (Math.max(0, p - 0.4) * 0.25); 
 
-    if (p > 0.35) { 
-      // 1. Update Tree Positions
-      for (let i = 0; i < treeCount; i++) {
-        const angle = treeAngles[i];
-        const r = treeRadii[i] * spreadMultiplier;
-        const x = Math.cos(angle) * r;
-        const z = Math.sin(angle) * r;
-        const y = -0.2 + (Math.max(0, p - 0.4) * 0.25); 
+            dummy.position.set(x, y, z);
+            dummy.rotation.set(0, -angle, 0); 
+            dummy.updateMatrix();
+            trees.setMatrixAt(i, dummy.matrix);
+          }
+          trees.instanceMatrix.needsUpdate = true;
 
-        dummy.position.set(x, y, z);
-        dummy.rotation.set(0, -angle, 0); 
-        dummy.updateMatrix();
-        trees.setMatrixAt(i, dummy.matrix);
-      }
-      trees.instanceMatrix.needsUpdate = true;
+          // Pure Math Fading & Smooth Color Burning
+          let treeAlpha = 0;
 
-      // 2. Pure Math Fading & Smooth Color Burning
-      let treeAlpha = 0;
-      
-      const green = new THREE.Color(0x1f7a1f);
-      const fieryYellow = new THREE.Color(0xff8800); 
-      const charred = new THREE.Color(0x110500); 
+          if (p > 0.4 && p <= 0.6) {
+            treeAlpha = (p - 0.4) * 5.0; 
+            treeMaterial.color.copy(colorGreen);
+            treeMaterial.emissive.copy(emissiveGreen);
+          } else if (p > 0.6 && p <= 1.1) {
+            treeAlpha = 1;
+            treeMaterial.color.copy(colorGreen);
+            treeMaterial.emissive.copy(emissiveGreen);
+          } else if (p > 1.1 && p <= 1.6) {
+            // --- 🌋 THE BURN SEQUENCE ---
+            treeAlpha = p > 1.35 ? 1.0 - ((p - 1.35) * 4.0) : 1;
+            const burnProgress = (p - 1.1) * 2.0;
 
-      if (p > 0.4 && p <= 0.6) {
-        // Fade IN smoothly
-        treeAlpha = (p - 0.4) * 5.0; 
-        treeMaterial.color.copy(green);
-      } else if (p > 0.6 && p <= 1.1) {
-        // Fully visible healthy forest
-        treeAlpha = 1;
-        treeMaterial.color.copy(green);
-      } else if (p > 1.1 && p <= 1.6) {
-        // --- 🌋 THE BURN SEQUENCE ---
-        treeAlpha = p > 1.35 ? 1.0 - ((p - 1.35) * 4.0) : 1;
-
-        const burnProgress = (p - 1.1) * 2.0;
-
-        if (burnProgress < 0.5) {
-          // Phase 1: Green -> Fiery Yellow
-          treeMaterial.color.lerpColors(green, fieryYellow, burnProgress * 2.0);
+            if (burnProgress < 0.5) {
+              const factor = burnProgress * 2.0;
+              treeMaterial.color.copy(colorGreen).lerp(colorYellow, factor);
+              treeMaterial.emissive.copy(emissiveGreen).lerp(emissiveYellow, factor);
+            } else {
+              const factor = (burnProgress - 0.5) * 2.0;
+              treeMaterial.color.copy(colorYellow).lerp(colorBlack, factor);
+              treeMaterial.emissive.copy(emissiveYellow).lerp(emissiveBlack, factor);
+            }
+          }
+          
+          treeMaterial.opacity = Math.max(0, Math.min(1, treeAlpha));
         } else {
-          // Phase 2: Fiery Yellow -> Charred Black
-          treeMaterial.color.lerpColors(fieryYellow, charred, (burnProgress - 0.5) * 2.0);
+          // FORCE INVISIBLE during ice phase
+          treeMaterial.opacity = 0;
+        }
+
+        // 3. Environment Elements
+        water.visible = p < 0.8;
+        water.material.opacity = Math.max(0, 1 - p * 0.8);
+
+        // 4. Lava Fountain Visibility
+        if (fountainParticles) {
+          fountainParticles.visible = p > 1.2;
+          fountainMaterial.opacity = Math.max(0, Math.min(1, (p - 1.2) * 2));
         }
       }
-      
-      // Apply exact calculated opacity
-      treeMaterial.opacity = Math.max(0, Math.min(1, treeAlpha));
-    } else {
-      // FORCE INVISIBLE during ice phase
-      treeMaterial.opacity = 0;
-    }
-
-    // 3. Environment Elements
-    water.visible = p < 0.8;
-    water.material.opacity = Math.max(0, 1 - p * 0.8);
-    // ... rest of your code ...
-
-    // 4. Lava Fountain Visibility
-    if (fountainParticles) {
-      fountainParticles.visible = p > 1.2;
-      fountainMaterial.opacity = Math.max(0, Math.min(1, (p - 1.2) * 2));
-   }
-      } // 👈 THIS CLOSES the onUpdate: (self) => { function
-    }); // 👈 THIS CLOSES the ScrollTrigger.create({ setup
+    });
 
 
   const animate = () => {
