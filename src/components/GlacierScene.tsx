@@ -381,20 +381,22 @@ scene.add(water);
     mesh.rotation.y = self.progress * Math.PI * 4;
     onPhaseUpdate(p);
 
-    // --- 🌲 DYNAMIC TREE POSITIONING & FADE ---
-    // INCREASED SPREAD: We use a multiplier (2.2) to ensure they stay outside the mountain mesh
-    const currentSpread = 1.0 + (Math.max(0, p - 0.4) * 2.2); 
+    // --- 🌲 SYNCHRONIZED TREE GROWTH ---
+    // NEW MATH: Uses 'Math.pow' to match the bulging curve of the mountain shader
+    const spreadMultiplier = 1.0 + Math.pow(Math.max(0, p - 0.4), 1.2) * 2.5; 
 
-    if (p > 0.5) { // Only start showing/positioning after ice phase
+    if (p > 0.45) { 
       // Update Tree Positions
       for (let i = 0; i < treeCount; i++) {
         const angle = treeAngles[i];
-        const r = treeRadii[i] * currentSpread;
+        const r = treeRadii[i] * spreadMultiplier;
+        
         const x = Math.cos(angle) * r;
         const z = Math.sin(angle) * r;
         
-        // Match the mountain's vertical growth
-        const y = -0.1 + (p * 0.25); 
+        // NEW MATH: Lifts the trees up a curved path so they stay on top of the slope
+        const heightLift = Math.pow(Math.max(0, p - 0.4), 0.8) * 0.5;
+        const y = -0.2 + heightLift; 
 
         dummy.position.set(x, y, z);
         // Tilt trees slightly away from center so they sit on the slope
@@ -404,9 +406,10 @@ scene.add(water);
       }
       trees.instanceMatrix.needsUpdate = true;
 
-      if (p < 1.7) {
+      // GSAP Fade Logic
+      if (p < 1.6) {
         // Healthy Forest
-        gsap.to(treeMaterial, { opacity: 1, duration: 0.2, overwrite: 'auto' });
+        gsap.to(treeMaterial, { opacity: 1, duration: 0.3, overwrite: 'auto' });
         treeMaterial.color.set(0x1f7a1f); 
       } else {
         // Volcanic Scorching - Fade them out as lava arrives
@@ -415,7 +418,7 @@ scene.add(water);
       }
     } else {
       // FORCE INVISIBLE: This fixes the "black trees during ice phase" bug
-      gsap.to(treeMaterial, { opacity: 0, duration: 0.1, overwrite: 'auto' });
+      gsap.to(treeMaterial, { opacity: 0, duration: 0.2, overwrite: 'auto' });
     }
 
     // 3. Environment Elements
