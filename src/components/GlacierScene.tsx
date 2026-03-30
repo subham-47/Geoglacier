@@ -265,38 +265,36 @@ water.position.y = -1.5;
 
 scene.add(water);
 
-    // 🌲 Trees (instanced for performance)
-const treeCount = 200;
+    // 🌲 Trees (instanced with position tracking)
+    const treeCount = 200;
+    const treeAngles = new Float32Array(treeCount);
+    const treeRadii = new Float32Array(treeCount);
 
-const treeGeometry = new THREE.ConeGeometry(0.05, 0.2, 6);
-const treeMaterial = new THREE.MeshStandardMaterial({ 
-  color: 0x1f7a1f, 
-  transparent: true, 
-  opacity: 0 
-});
+    const treeGeometry = new THREE.ConeGeometry(0.05, 0.2, 6);
+    const treeMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x1f7a1f, 
+      transparent: true, 
+      opacity: 0 
+    });
 
-const trees = new THREE.InstancedMesh(treeGeometry, treeMaterial, treeCount);
+    const trees = new THREE.InstancedMesh(treeGeometry, treeMaterial, treeCount);
+    const dummy = new THREE.Object3D();
 
-const dummy = new THREE.Object3D();
+    for (let i = 0; i < treeCount; i++) {
+      // Save these so we can "push" the trees out later
+      treeAngles[i] = Math.random() * Math.PI * 2;
+      treeRadii[i] = 1.3 + Math.random() * 0.7;
 
-for (let i = 0; i < treeCount; i++) {
-  const angle = Math.random() * Math.PI * 2;
-  const radius = 1.2 + Math.random() * 0.6;
+      const x = Math.cos(treeAngles[i]) * treeRadii[i];
+      const z = Math.sin(treeAngles[i]) * treeRadii[i];
+      const y = -0.2;
 
-  const x = Math.cos(angle) * radius;
-  const z = Math.sin(angle) * radius;
+      dummy.position.set(x, y, z);
+      dummy.updateMatrix();
+      trees.setMatrixAt(i, dummy.matrix);
+    }
 
-  // place slightly above surface
-  const y = Math.random() * 0.3 - 0.2;
-
-  dummy.position.set(x, y, z);
-  dummy.scale.setScalar(0.8 + Math.random() * 0.6);
-
-  dummy.updateMatrix();
-  trees.setMatrixAt(i, dummy.matrix);
-}
-
-scene.add(trees);
+    scene.add(trees);
 
     // Particles
     const particlesCount = 1000;
