@@ -364,6 +364,17 @@ scene.add(water);
     window.addEventListener('resize', handleResize);
 
     const clock = new THREE.Clock();
+    
+    // --- 🎨 TREE COLOR STATES ---
+  const colorGreen = new THREE.Color(0x1f7a1f);
+  const colorYellow = new THREE.Color(0xffaa00); // Bright fire
+  const colorBlack = new THREE.Color(0x110500);  // Burnt ash
+
+  const emissiveGreen = new THREE.Color(0x051105);
+  const emissiveYellow = new THREE.Color(0x662200); // Fiery glow
+  const emissiveBlack = new THREE.Color(0x000000);  // Dead ash
+
+    // ... your trigger setup ...
 
     ScrollTrigger.create({
   trigger: '#scroll-container',
