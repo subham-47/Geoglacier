@@ -387,35 +387,36 @@ scene.add(trees);
   particlesMesh.rotation.y = elapsedTime * 0.05;
   particlesMesh.position.y = Math.sin(elapsedTime * 0.2) * 0.5;
 
-    // --- 🌋 LAVA ERUPTION PHYSICS ---
+    // --- 🌋 PERFECT SCROLL-SCRUBBED LAVA PHYSICS ---
+  // Smoothly catch up to the scroll position
+  currentFountainTime += (targetFountainTime - currentFountainTime) * 0.05;
+
   if (fountainParticles && fountainParticles.visible) {
     const positions = fountainGeometry.attributes.position.array as Float32Array;
+    const params = fountainGeometry.attributes.aParams.array as Float32Array;
     
+    const gravity = 5.0; // Controls how fast it arcs downward
+
     for (let i = 0; i < fountainCount; i++) {
       const i3 = i * 3;
+      const i4 = i * 4;
 
-      // Move particle
-      positions[i3 + 0] += fountainVelocities[i3 + 0];
-      positions[i3 + 1] += fountainVelocities[i3 + 1];
-      positions[i3 + 2] += fountainVelocities[i3 + 2];
+      const angle = params[i4 + 0];
+      const spread = params[i4 + 1];
+      const jumpHeight = params[i4 + 2];
+      const offset = params[i4 + 3];
 
-      // Gravity pulls it down
-      fountainVelocities[i3 + 1] -= 0.5 * deltaTime; 
+      // localTime loops from 0.0 to 1.0 based entirely on your scroll wheel!
+      const localTime = (currentFountainTime + offset) % 1.0;
 
-      // If it falls below the crater, reset it to explode again
-      if (positions[i3 + 1] < 1.1) {
-        positions[i3 + 0] = 0;
-        positions[i3 + 1] = 1.3;
-        positions[i3 + 2] = 0;
-
-        fountainVelocities[i3 + 0] = (Math.random() - 0.5) * 0.08;
-        fountainVelocities[i3 + 1] = Math.random() * 0.15 + 0.1;
-        fountainVelocities[i3 + 2] = (Math.random() - 0.5) * 0.08;
-      }
+      // Mathematical Parabola (x, y, z)
+      positions[i3 + 0] = Math.cos(angle) * spread * localTime;
+      positions[i3 + 1] = 1.3 + (jumpHeight * localTime) - (0.5 * gravity * localTime * localTime);
+      positions[i3 + 2] = Math.sin(angle) * spread * localTime;
     }
     fountainGeometry.attributes.position.needsUpdate = true;
   }
-  // --- END LAVA PHYSICS ---
+  // --- END PERFECT LAVA PHYSICS ---
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
