@@ -284,7 +284,7 @@ scene.add(water);
     for (let i = 0; i < treeCount; i++) {
       // Save these so we can "push" the trees out later
       treeAngles[i] = Math.random() * Math.PI * 2;
-      treeRadii[i] = 1.3 + Math.random() * 0.7;
+      treeRadii[i] = 1.4 + Math.random() * 0.8;
 
       const x = Math.cos(treeAngles[i]) * treeRadii[i];
       const z = Math.sin(treeAngles[i]) * treeRadii[i];
