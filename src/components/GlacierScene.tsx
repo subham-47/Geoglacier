@@ -342,6 +342,10 @@ scene.add(trees);
   onUpdate: (self) => {
     const p = self.progress * 2;
 
+    // 👇 PASTE THIS LINE RIGHT HERE 👇
+        targetFountainTime = Math.max(0, (p - 1.2) * 6); // '6' controls how many eruption cycles happen during the scroll
+        material.uniforms.uPhase.value = p;
+
     material.uniforms.uPhase.value = p;
     mesh.rotation.y = self.progress * Math.PI * 4;
     onPhaseUpdate(p);
