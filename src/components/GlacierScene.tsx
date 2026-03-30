@@ -315,7 +315,7 @@ scene.add(water);
     scene.add(particlesMesh);
 
     // --- 🌋 SCROLL-DRIVEN LAVA FOUNTAIN SETUP ---
-    const fountainCount = 2500;
+    const fountainCount = 3500;
     const fountainGeometry = new THREE.BufferGeometry();
     const fountainPositions = new Float32Array(fountainCount * 3);
     const fountainParams = new Float32Array(fountainCount * 4); // Stores: [angle, spread, jumpHeight, timeOffset]
