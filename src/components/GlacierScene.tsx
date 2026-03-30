@@ -320,7 +320,7 @@ scene.add(trees);
     for (let i = 0; i < fountainCount; i++) {
       // Define the fixed parabolic path for each particle
       fountainParams[i * 4 + 0] = Math.random() * Math.PI * 2; // Random angle (0 to 360deg)
-      fountainParams[i * 4 + 1] = Math.random() * 0.8; // Spread distance outward
+      fountainParams[i * 4 + 1] = Math.random() * 1.5; // Spread distance outward
       fountainParams[i * 4 + 2] = Math.random() * 6.0 + 4.0; // Upward jump height
       fountainParams[i * 4 + 3] = Math.random(); // Phase offset so they don't jump at the exact same time
 
@@ -423,7 +423,7 @@ scene.add(trees);
     const positions = fountainGeometry.attributes.position.array as Float32Array;
     const params = fountainGeometry.attributes.aParams.array as Float32Array;
     
-    const gravity = 5.0; // Controls how fast it arcs downward
+    const gravity = 3.5; // Controls how fast it arcs downward
 
     for (let i = 0; i < fountainCount; i++) {
       const i3 = i * 3;
