@@ -372,49 +372,65 @@ scene.add(water);
   onUpdate: (self) => {
     const p = self.progress * 2;
 
-    // 👇 PASTE THIS LINE RIGHT HERE 👇
-        targetFountainTime = Math.max(0, (p - 1.2) * 6); // '6' controls how many eruption cycles happen during the scroll
-        material.uniforms.uPhase.value = p;
-
+    // 1. Lava Fountain Timing
+    targetFountainTime = Math.max(0, (p - 1.2) * 6); 
+    
+    // 2. Phase and Rotation
     material.uniforms.uPhase.value = p;
     mesh.rotation.y = self.progress * Math.PI * 4;
     onPhaseUpdate(p);
 
-    // --- 🌲 SMOOTH TREE FADE ---
-    // New logic: Stays until 1.7 (well into the lava phase)
+    // --- 🌲 DYNAMIC TREE POSITIONING & FADE ---
+    // This math mimics the 'mtnSpread' in your shader to keep trees on the surface
+    const currentSpread = 1.0 + (Math.max(0, p - 0.5) * 0.8); 
+
     if (p > 0.4) { 
+      // Update Tree Positions
+      for (let i = 0; i < treeCount; i++) {
+        const angle = treeAngles[i];
+        const r = treeRadii[i] * currentSpread;
+        const x = Math.cos(angle) * r;
+        const z = Math.sin(angle) * r;
+        const y = -0.2 + (p * 0.15); // Lift them as the mountain rises
+
+        dummy.position.set(x, y, z);
+        dummy.updateMatrix();
+        trees.setMatrixAt(i, dummy.matrix);
+      }
+      trees.instanceMatrix.needsUpdate = true;
+
       if (p < 1.7) {
-        // Trees are healthy and visible
+        // Healthy Forest
         gsap.to(treeMaterial, { opacity: 1, duration: 0.4, overwrite: 'auto' });
-        treeMaterial.color.set(0x1f7a1f); // Reset to forest green
+        treeMaterial.color.set(0x1f7a1f); 
       } else {
-        // Lava has arrived! Fade them out as they "burn"
+        // Volcanic Scorching
         gsap.to(treeMaterial, { opacity: 0, duration: 0.8, overwrite: 'auto' });
-        treeMaterial.color.set(0x221100); // Optional: Turn them charred brown/black before they vanish
+        treeMaterial.color.set(0x221100); 
       }
     } else {
-      // Ice phase: Trees haven't grown yet
+      // Pre-vegetation (Glacial Phase)
       gsap.to(treeMaterial, { opacity: 0, duration: 0.3, overwrite: 'auto' });
     }
+
+    // 3. Environment Elements (Water & Particles)
     water.visible = p < 0.8;
     water.material.opacity = Math.max(0, 1 - p * 0.8);
 
     if (p < 0.5) {
-      particlesMaterial.color.set(0xffffff);
+      particlesMaterial.color.set(0xffffff); // Snow
     } else if (p < 1.5) {
-      particlesMaterial.color.set(0x4ade80);
+      particlesMaterial.color.set(0x4ade80); // Bio-particles
     } else {
-      particlesMaterial.color.set(0x222222); // Turn general particles to dark volcanic ash
+      particlesMaterial.color.set(0x222222); // Volcanic Ash
     }
 
-    // --- 🌋 FOUNTAIN VISIBILITY ---
+    // 4. Lava Fountain Visibility
     if (fountainParticles) {
       fountainParticles.visible = p > 1.2;
-      // Fade it in as it erupts
       fountainMaterial.opacity = Math.max(0, Math.min(1, (p - 1.2) * 2));
     }
-  },
-}); 
+}, 
 
   const animate = () => {
   const elapsedTime = clock.getElapsedTime();
