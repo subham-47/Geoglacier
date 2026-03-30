@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-// --- DATA FROM REFERENCE FILE ---
 const TOPICS = [
   { id: 'mineralogy', icon: '💎', name: 'Mineralogy', desc: 'Crystal systems, physical & optical properties, silicate classification', count: '48 subtopics', status: 'Active' },
   { id: 'petrology', icon: '🪨', name: 'Petrology', desc: 'Igneous, sedimentary and metamorphic rocks — classification & textures', count: '52 subtopics', status: 'Active' },
@@ -20,26 +19,20 @@ const EXAMS = [
 ];
 
 const MINERALS = [
-  { name: 'Quartz', formula: 'SiO₂', hardness: 7, lustre: 'Vitreous', cleavage: 'None', sg: '2.65', colorHex: '#d4e5ff' },
-  { name: 'Orthoclase', formula: 'KAlSi₃O₈', hardness: 6, lustre: 'Vitreous', cleavage: '2 dir @ 90°', sg: '2.56', colorHex: '#f0e0c0' },
-  { name: 'Olivine', formula: '(Mg,Fe)₂SiO₄', hardness: 6.5, lustre: 'Vitreous', cleavage: 'Imperfect', sg: '3.27–4.37', colorHex: '#80a050' },
-  { name: 'Biotite', formula: 'K(Mg,Fe)₃AlSi₃O₁₀(OH)₂', hardness: 2.5, lustre: 'Pearly', cleavage: '1 perfect', sg: '2.8–3.4', colorHex: '#8b6914' },
-  { name: 'Calcite', formula: 'CaCO₃', hardness: 3, lustre: 'Vitreous', cleavage: '3 dir @ 75°', sg: '2.71', colorHex: '#f0f0f8' },
-  { name: 'Magnetite', formula: 'Fe₃O₄', hardness: 6, lustre: 'Metallic', cleavage: 'None', sg: '5.18', colorHex: '#202020' },
+  { name: 'Quartz', formula: 'SiO₂', hardness: '7', lustre: 'Vitreous', cleavage: 'None', sg: '2.65', colorHex: '#d4e5ff' },
+  { name: 'Orthoclase', formula: 'KAlSi₃O₈', hardness: '6', lustre: 'Vitreous', cleavage: '2 dir @ 90°', sg: '2.56', colorHex: '#f0e0c0' },
+  { name: 'Olivine', formula: '(Mg,Fe)₂SiO₄', hardness: '6.5', lustre: 'Vitreous', cleavage: 'Imperfect', sg: '3.27–4.37', colorHex: '#80a050' },
+  { name: 'Biotite', formula: 'K(Mg,Fe)₃AlSi₃O₁₀(OH)₂', hardness: '2.5', lustre: 'Pearly', cleavage: '1 perfect', sg: '2.8–3.4', colorHex: '#8b6914' },
+  { name: 'Calcite', formula: 'CaCO₃', hardness: '3', lustre: 'Vitreous', cleavage: '3 dir @ 75°', sg: '2.71', colorHex: '#f0f0f8' },
+  { name: 'Magnetite', formula: 'Fe₃O₄', hardness: '6', lustre: 'Metallic', cleavage: 'None', sg: '5.18', colorHex: '#202020' },
 ];
 
-export const ContentOverlay: React.FC = () => {
-  const [examTab, setExamTab] = useState<'profiles' | 'notifications' | 'pyq'>('profiles');
+const ContentOverlay = () => {
+  const [examTab, setExamTab] = useState('profiles');
 
   return (
-    // The main container: pointer-events-none lets scrolling pass through to the canvas,
-    // but we re-enable pointer-events-auto on the actual content sections so buttons work.
-    <div className="absolute top-0 left-0 w-full min-h-screen z-10 pointer-events-none">
-      
-      {/* Spacer to push content down past your Hero section */}
-      <div className="h-screen w-full"></div>
-
-      <div className="max-w-7xl mx-auto px-6 py-24 space-y-40 pointer-events-auto text-white">
+    <div className="w-full relative z-10">
+      <div className="max-w-7xl mx-auto px-6 py-32 space-y-40 text-slate-50">
         
         {/* --- TOPIC LIBRARY --- */}
         <section id="topics">
@@ -50,7 +43,6 @@ export const ContentOverlay: React.FC = () => {
             <h2 className="text-4xl md:text-5xl font-bold">Every branch of <span className="text-blue-300 italic">geology, structured.</span></h2>
           </div>
 
-          {/* Glassmorphism Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {TOPICS.map((topic) => (
               <div key={topic.id} className="bg-slate-900/40 backdrop-blur-md border border-white/10 p-6 rounded-2xl hover:bg-slate-800/60 hover:-translate-y-1 transition-all duration-300 group cursor-pointer shadow-xl">
@@ -77,7 +69,6 @@ export const ContentOverlay: React.FC = () => {
             <h2 className="text-4xl md:text-5xl font-bold">Every geology exam, <span className="text-blue-300 italic">one place.</span></h2>
           </div>
 
-          {/* Glassy Tabs */}
           <div className="flex gap-2 p-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl w-fit mb-8">
             <button onClick={() => setExamTab('profiles')} className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${examTab === 'profiles' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}>Exam Profiles</button>
             <button onClick={() => setExamTab('notifications')} className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${examTab === 'notifications' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}>🔔 Notifications</button>
