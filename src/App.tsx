@@ -50,44 +50,137 @@ export default function App() {
   return (
     <div className="relative bg-[#020617] text-slate-50 min-h-screen selection:bg-blue-500/30">
       <GlacierScene onPhaseUpdate={setPhase} />
-
-      {/* --- TOP NAVIGATION --- */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-6 md:px-12 pointer-events-auto">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      
+      {/* ----------------------------------------- */}
+      {/* --- TOP NAVIGATION (Mega Menu Update) --- */}
+      {/* ----------------------------------------- */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#020617]/80 backdrop-blur-xl pointer-events-auto">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          
+          {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)]">
               <span className="text-white font-bold text-lg">G</span>
             </div>
-            <span className="font-display font-bold text-lg tracking-wider uppercase">GeoGlacier</span>
+            <span className="font-display font-bold text-lg tracking-wider uppercase">Geo<span className="text-blue-400 italic font-medium text-base lowercase">Glacier</span></span>
           </div>
           
-          <div className="hidden md:flex items-center gap-10">
-            {/* Smooth Scroll Navigation Links */}
-            {['Evolution', 'Research', 'Data', 'Contact'].map((item) => (
+          {/* Desktop Links & Mega Menus */}
+          <div className="hidden md:flex items-center gap-8">
+            
+            {/* 1. Topic Library (Mega Menu) */}
+            <div className="relative group">
               <button 
-                key={item} 
                 onClick={() => {
-                  const target = document.getElementById(item.toLowerCase());
-                  if (target) {
-                    const topOffset = target.getBoundingClientRect().top + window.scrollY;
-                    window.scrollTo({ top: topOffset, behavior: 'smooth' });
-                  }
+                  const el = document.getElementById('topics');
+                  el && window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
                 }}
-                className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400 hover:text-blue-400 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-blue-400 transition-colors py-4"
               >
-                {item}
+                📚 Topic Library <span className="text-[10px] opacity-50 group-hover:rotate-180 transition-transform">▼</span>
               </button>
-            ))}
+              
+              {/* Dropdown Panel */}
+              <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-[600px] invisible opacity-0 translate-y-4 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out bg-slate-950 border border-white/10 rounded-xl p-6 shadow-[0_24px_80px_rgba(0,0,0,0.8)] grid grid-cols-2 gap-8">
+                <div>
+                  <h4 className="text-[10px] font-mono text-blue-500 uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Foundational</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                      <span className="text-lg">💎</span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-200 group-hover/link:text-blue-400 transition-colors">Mineralogy</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Crystal systems, properties</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                      <span className="text-lg">🪨</span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-200 group-hover/link:text-blue-400 transition-colors">Petrology</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Igneous, sedimentary, metamorphic</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-[10px] font-mono text-blue-500 uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Applied</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                      <span className="text-lg">🌋</span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-200 group-hover/link:text-blue-400 transition-colors">Structural Geology</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Folds, faults, tectonics</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                      <span className="text-lg">🗺️</span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-200 group-hover/link:text-blue-400 transition-colors">Geomorphology</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Landforms, erosion cycles</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Quiz Hub (Small Dropdown) */}
+            <div className="relative group">
+              <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-blue-400 transition-colors py-4">
+                🧠 Quiz Hub <span className="text-[10px] opacity-50 group-hover:rotate-180 transition-transform">▼</span>
+              </button>
+              <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-[240px] invisible opacity-0 translate-y-4 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out bg-slate-950 border border-white/10 rounded-xl p-4 shadow-[0_24px_80px_rgba(0,0,0,0.8)] space-y-2">
+                <div className="hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
+                  <span>📝</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-200">Topic Quiz</div>
+                    <div className="text-xs text-slate-500">Practice by subject</div>
+                  </div>
+                </div>
+                <div className="hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
+                  <span>⏱️</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-200">Mock Test</div>
+                    <div className="text-xs text-slate-500">Full simulation</div>
+                  </div>
+                  <span className="ml-auto text-[9px] uppercase font-bold bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Live</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Exam Corner (Direct Link) */}
             <button 
               onClick={() => {
-                const target = document.getElementById('data');
-                target?.scrollIntoView({ behavior: 'smooth' });
+                const el = document.getElementById('exams');
+                el && window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
               }}
-              className="px-6 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-[10px] font-mono uppercase tracking-widest hover:bg-blue-600/20 transition-all"
+              className="text-xs font-semibold text-slate-300 hover:text-blue-400 transition-colors py-4"
             >
-              Explore Data
+              📋 Exam Corner
+            </button>
+
+            {/* 4. Glacier Lab (Direct Link) */}
+            <button 
+              onClick={() => {
+                const el = document.getElementById('minerals');
+                el && window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+              }}
+              className="text-xs font-semibold text-slate-300 hover:text-blue-400 transition-colors py-4"
+            >
+              🔬 Glacier Lab
+            </button>
+
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-5">
+            <button className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:border-blue-500/50 transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </button>
+            <button className="hidden md:flex bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-600 hover:to-blue-400 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)] hover:-translate-y-0.5">
+              Start Quiz →
             </button>
           </div>
+
         </div>
       </nav>
 
