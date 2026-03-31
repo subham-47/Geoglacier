@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom'
 import GlacierScene from './components/GlacierScene';
 import ContentOverlay from './components/ContentOverlay';
 import { motion } from 'motion/react';
@@ -138,13 +138,13 @@ function App() {
                 Quiz Hub <span className="text-[8px] opacity-50 group-hover:rotate-180 transition-transform">▼</span>
               </button>
               <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-[240px] invisible opacity-0 translate-y-4 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out bg-slate-950 border border-white/10 rounded-xl p-4 shadow-[0_24px_80px_rgba(0,0,0,0.8)] space-y-2 text-left normal-case tracking-normal">
-                <div className="hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
-                  <span>📝</span>
-                  <div>
-                    <div className="text-sm font-bold text-slate-200">Topic Quiz</div>
-                    <div className="text-xs text-slate-500">Practice by subject</div>
-                  </div>
-                </div>
+                <Link to="/quiz" className="hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
+              <span>📝</span>
+              <div>
+              <div className="text-sm font-bold text-slate-200">Topic Quiz</div>
+              <div className="text-xs text-slate-500">Practice by subject</div>
+            </div>
+          </Link>
                 <div className="hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
                   <span>⏱️</span>
                   <div>
