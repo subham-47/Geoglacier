@@ -235,8 +235,8 @@ const particleVertexShader = `
     
     // Volcano turbulence (Heat rising)
     float heatRise = 0.0;
-    if (uPhase > 1.5) {
-        heatRise = (uPhase - 1.5) * 2.0 * (0.5 + aRandom.z);
+    if (uPhase > 1.25) {
+        heatRise = (uPhase - 1.25) * 2.0 * (0.5 + aRandom.z);
         pos.y += uTime * heatRise;
     }
 
@@ -261,9 +261,9 @@ const particleVertexShader = `
     float size = baseSize * (0.5 + aRandom.x * 1.5);
     
     vGlow = 0.0;
-    if (uPhase > 1.5) {
+    if (uPhase > 1.25) {
         // Embers glow more
-        vGlow = step(0.8, aRandom.y) * (uPhase - 1.5) * 2.0;
+        vGlow = step(0.8, aRandom.y) * (uPhase - 1.25) * 2.0;
     }
 
     gl_PointSize = size * (300.0 / -mvPosition.z);
