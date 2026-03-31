@@ -594,8 +594,9 @@ scene.add(water);
     const animate = () => {
       const elapsedTime = clock.getElapsedTime();
       
-      // Main Mountain Time Update
+      // Pass the time to both the mountain AND the particles!
       material.uniforms.uTime.value = elapsedTime;
+      particlesMaterial.uniforms.uTime.value = elapsedTime;
 
       // --- LIQUID WATER RIPPLES ---
       water.rotation.y = elapsedTime * 0.05;
