@@ -212,45 +212,70 @@ const particleVertexShader = `
   uniform float uPhase;
   attribute vec3 aRandom;
   varying float vRandom;
+  varying float vGlow;
 
   void main() {
     vRandom = aRandom.x;
     vec3 pos = position;
 
+    // Base fall speed
     float fallSpeed = mix(0.8, 4.5, smoothstep(0.0, 1.0, uPhase));
     if (uPhase > 1.0) {
         fallSpeed = mix(4.5, 1.2, smoothstep(1.0, 2.0, uPhase));
     }
 
+    // Drift / Wind
     float drift = mix(0.6, 0.05, smoothstep(0.0, 1.0, uPhase));
     if (uPhase > 1.0) {
         drift = mix(0.05, 1.5, smoothstep(1.0, 2.0, uPhase));
     }
 
-    pos.y -= uTime * fallSpeed * (0.5 + aRandom.y * 0.5);
-    pos.x += sin(uTime * 0.5 + aRandom.z * 10.0) * drift;
-    pos.z += cos(uTime * 0.3 + aRandom.x * 10.0) * drift;
+    // Apply movement
+    float individualSpeed = fallSpeed * (0.3 + aRandom.y * 1.4); // More variation in speed
+    
+    // Volcano turbulence (Heat rising)
+    float heatRise = 0.0;
+    if (uPhase > 1.5) {
+        heatRise = (uPhase - 1.5) * 2.0 * (0.5 + aRandom.z);
+        pos.y += uTime * heatRise;
+    }
 
+    pos.y -= uTime * individualSpeed;
+    pos.x += sin(uTime * 0.5 + aRandom.z * 20.0) * drift;
+    pos.z += cos(uTime * 0.3 + aRandom.x * 20.0) * drift;
+
+    // Wrap around
     pos.y = mod(pos.y + 10.0, 20.0) - 10.0;
     pos.x = mod(pos.x + 10.0, 20.0) - 10.0;
     pos.z = mod(pos.z + 10.0, 20.0) - 10.0;
 
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     
-    float size = mix(0.08, 0.04, smoothstep(0.0, 1.0, uPhase));
+    // Size variation
+    float baseSize = mix(0.08, 0.04, smoothstep(0.0, 1.0, uPhase));
     if (uPhase > 1.0) {
-        size = mix(0.04, 0.1, smoothstep(1.0, 2.0, uPhase));
+        baseSize = mix(0.04, 0.12, smoothstep(1.0, 2.0, uPhase));
     }
     
+    // Individual size variation (Snowflakes are varied, Ash is varied)
+    float size = baseSize * (0.5 + aRandom.x * 1.5);
+    
+    vGlow = 0.0;
+    if (uPhase > 1.5) {
+        // Embers glow more
+        vGlow = step(0.8, aRandom.y) * (uPhase - 1.5) * 2.0;
+    }
+
     gl_PointSize = size * (300.0 / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
 
-
 const particleFragmentShader = `
+  uniform float uTime;
   uniform float uPhase;
   varying float vRandom;
+  varying float vGlow;
 
   void main() {
     float d = distance(gl_PointCoord, vec2(0.5));
@@ -258,7 +283,11 @@ const particleFragmentShader = `
 
     vec3 snowColor = vec3(0.9, 0.95, 1.0);
     vec3 rainColor = vec3(0.4, 0.6, 0.9);
-    vec3 ashColor = mix(vec3(0.3, 0.3, 0.3), vec3(1.0, 0.4, 0.1), vRandom);
+    
+    // Ash and Embers
+    vec3 ashBase = vec3(0.25, 0.2, 0.18);
+    vec3 emberColor = vec3(1.0, 0.3, 0.0);
+    vec3 ashColor = mix(ashBase, emberColor, vGlow * (sin(uTime * 5.0 + vRandom * 10.0) * 0.5 + 0.5));
 
     vec3 color;
     if (uPhase <= 1.0) {
@@ -272,7 +301,13 @@ const particleFragmentShader = `
         alpha = mix(0.4, 0.9, smoothstep(1.0, 2.0, uPhase));
     }
 
-    gl_FragColor = vec4(color, alpha * (1.0 - d * 2.0));
+    // Add flicker to embers
+    float finalAlpha = alpha * (1.0 - d * 2.0);
+    if (vGlow > 0.1) {
+        finalAlpha *= (0.7 + 0.3 * sin(uTime * 10.0 + vRandom * 20.0));
+    }
+
+    gl_FragColor = vec4(color, finalAlpha);
   }
 `;
 
