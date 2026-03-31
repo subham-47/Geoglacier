@@ -202,8 +202,11 @@ if(uPhase > 1.5){
   }
 `;
 
-// particle system//
-//--------------------------------//
+
+interface GlacierSceneProps {
+  onPhaseUpdate: (phase: number) => void;
+}
+
 const particleVertexShader = `
   uniform float uTime;
   uniform float uPhase;
@@ -243,10 +246,6 @@ const particleVertexShader = `
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
-
-interface GlacierSceneProps {
-  onPhaseUpdate: (phase: number) => void;
-}
 
 
 const particleFragmentShader = `
