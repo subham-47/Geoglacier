@@ -36,11 +36,10 @@ export default function ContentOverlay() {
   const [examTab, setExamTab] = useState<string>('profiles');
 
   return (
-    // Pointer-events-none allows scrolling the 3D scene, but we re-enable it on the content
     <div className="w-full relative z-10 pointer-events-none">
       <div className="max-w-6xl mx-auto px-6 py-32 space-y-48 text-slate-50">
         
-        {/* --- TOPIC LIBRARY (Sleek Minimal Grid, limited to 4) --- */}
+        {/* --- TOPIC LIBRARY --- */}
         <section id="topics" className="pointer-events-auto">
           <div className="mb-10 flex justify-between items-end">
             <div>
@@ -49,14 +48,16 @@ export default function ContentOverlay() {
               </p>
               <h2 className="text-4xl font-light tracking-wide">Branches of <span className="text-blue-300 font-bold italic">Geology</span></h2>
             </div>
-            <button className="text-sm font-medium text-slate-400 hover:text-white transition-colors border-b border-slate-700 hover:border-white pb-1">
+            <button 
+              onClick={() => alert("Link to topics!")}
+              className="text-sm font-medium text-slate-400 hover:text-white transition-colors border-b border-slate-700 hover:border-white pb-1"
+            >
               Explore All Topics &rarr;
             </button>
           </div>
 
-          {/* Ultra-minimal cards: No heavy backgrounds, just thin borders and subtle hover */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TOPICS.slice(0, 4).map((topic) => ( // ONLY SHOW FIRST 4
+            {TOPICS.slice(0, 4).map((topic) => (
               <div key={topic.id} className="p-6 border-t border-white/10 hover:border-blue-400/50 hover:bg-white/[0.02] transition-all duration-300 group cursor-pointer">
                 <div className="text-3xl mb-4 opacity-70 group-hover:opacity-100 transition-opacity">{topic.icon}</div>
                 <h3 className="text-lg font-bold mb-2 group-hover:text-blue-300 transition-colors">{topic.name}</h3>
@@ -66,7 +67,7 @@ export default function ContentOverlay() {
           </div>
         </section>
 
-       {/* --- EXAM CORNER --- */}
+        {/* --- EXAM CORNER --- */}
         <section id="exams" className="pointer-events-auto max-w-3xl">
           <div className="mb-10">
             <p className="text-blue-400 tracking-[0.2em] text-xs uppercase font-bold mb-3 flex items-center gap-4">
@@ -75,14 +76,12 @@ export default function ContentOverlay() {
             <h2 className="text-4xl font-light tracking-wide">Target <span className="text-blue-300 font-bold italic">Exams</span></h2>
           </div>
 
-          {/* All 3 Buttons Restored! */}
           <div className="flex gap-4 border-b border-white/10 pb-4 mb-6">
             <button onClick={() => setExamTab('profiles')} className={`text-sm font-medium transition-colors ${examTab === 'profiles' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}>Exam Profiles</button>
             <button onClick={() => setExamTab('notifications')} className={`text-sm font-medium transition-colors ${examTab === 'notifications' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}>Notifications</button>
             <button onClick={() => setExamTab('pyq')} className={`text-sm font-medium transition-colors ${examTab === 'pyq' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}>PYQ Archive</button>
           </div>
 
-          {/* TAB CONTENT: Profiles */}
           {examTab === 'profiles' && (
             <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
               {EXAMS.map((exam) => (
@@ -102,7 +101,6 @@ export default function ContentOverlay() {
             </div>
           )}
 
-          {/* TAB CONTENT: Notifications Placeholder */}
           {examTab === 'notifications' && (
             <div className="p-8 text-center border border-white/5 rounded-xl bg-white/[0.01] animate-in fade-in slide-in-from-bottom-2 duration-500">
               <span className="text-3xl mb-3 block opacity-50">🔔</span>
@@ -111,7 +109,6 @@ export default function ContentOverlay() {
             </div>
           )}
 
-          {/* TAB CONTENT: PYQ Archive Placeholder */}
           {examTab === 'pyq' && (
             <div className="p-8 text-center border border-white/5 rounded-xl bg-white/[0.01] animate-in fade-in slide-in-from-bottom-2 duration-500">
               <span className="text-3xl mb-3 block opacity-50">📚</span>
@@ -121,7 +118,7 @@ export default function ContentOverlay() {
           )}
         </section>
 
-        {/* --- MINERAL DATABASE (Compact Bento Box) --- */}
+        {/* --- MINERAL DATABASE --- */}
         <section id="minerals" className="pointer-events-auto">
            <div className="mb-10 flex justify-between items-end">
             <div>
@@ -130,8 +127,6 @@ export default function ContentOverlay() {
               </p>
               <h2 className="text-4xl font-light tracking-wide">Mineral <span className="text-blue-300 font-bold italic">Database</span></h2>
             </div>
-            
-            {/* 👇 FIX 1: The onClick is added here so the button works */}
             <button 
               onClick={() => alert("This will link to your full Lab page!")} 
               className="text-sm font-medium text-slate-400 hover:text-white transition-colors border-b border-slate-700 hover:border-white pb-1"
@@ -140,7 +135,6 @@ export default function ContentOverlay() {
             </button>
           </div>
 
-          {/* Smaller, sleeker cards that don't overwhelm the screen */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-start">
             {MINERALS.slice(0, 6).map((min) => (
               <div key={min.name} className="h-fit relative group overflow-hidden rounded-xl border border-white/5 bg-black/20 backdrop-blur-sm cursor-pointer hover:border-white/20 transition-all">
@@ -151,25 +145,6 @@ export default function ContentOverlay() {
                   <h3 className="text-lg font-bold mb-1 text-slate-200">{min.name}</h3>
                   <p className="text-xs font-mono text-slate-500 group-hover:text-blue-400 transition-colors">{min.formula}</p>
                   
-                  <div className="max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-4 transition-all duration-300 overflow-hidden text-[10px] text-slate-400 space-y-1">
-                    <p>Hardness: <span className="text-white">{min.hardness}</span></p>
-                    <p>SG: <span className="text-white">{min.sg}</span></p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-              
-              {/* 👇 FIX 3: Added 'h-fit' right at the beginning of this className */}
-              <div key={min.name} className="h-fit relative group overflow-hidden rounded-xl border border-white/5 bg-black/20 backdrop-blur-sm cursor-pointer hover:border-white/20 transition-all">
-                
-                <div className="absolute top-0 left-0 right-0 h-1 opacity-50 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: min.colorHex }}></div>
-                
-                <div className="p-5 text-center">
-                  <h3 className="text-lg font-bold mb-1 text-slate-200">{min.name}</h3>
-                  <p className="text-xs font-mono text-slate-500 group-hover:text-blue-400 transition-colors">{min.formula}</p>
-                  
-                  {/* 👇 FIX 4: Changed h-0/h-auto to max-h-0/max-h-24 for smooth sliding */}
                   <div className="max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-4 transition-all duration-300 overflow-hidden text-[10px] text-slate-400 space-y-1">
                     <p>Hardness: <span className="text-white">{min.hardness}</span></p>
                     <p>SG: <span className="text-white">{min.sg}</span></p>
