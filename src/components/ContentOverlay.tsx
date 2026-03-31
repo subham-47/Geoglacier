@@ -140,9 +140,25 @@ export default function ContentOverlay() {
             </button>
           </div>
 
-          {/* 👇 FIX 2: Added 'items-start' to the end of this className */}
+          {/* Smaller, sleeker cards that don't overwhelm the screen */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-start">
             {MINERALS.slice(0, 6).map((min) => (
+              <div key={min.name} className="h-fit relative group overflow-hidden rounded-xl border border-white/5 bg-black/20 backdrop-blur-sm cursor-pointer hover:border-white/20 transition-all">
+                
+                <div className="absolute top-0 left-0 right-0 h-1 opacity-50 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: min.colorHex }}></div>
+                
+                <div className="p-5 text-center">
+                  <h3 className="text-lg font-bold mb-1 text-slate-200">{min.name}</h3>
+                  <p className="text-xs font-mono text-slate-500 group-hover:text-blue-400 transition-colors">{min.formula}</p>
+                  
+                  <div className="max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-4 transition-all duration-300 overflow-hidden text-[10px] text-slate-400 space-y-1">
+                    <p>Hardness: <span className="text-white">{min.hardness}</span></p>
+                    <p>SG: <span className="text-white">{min.sg}</span></p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
               
               {/* 👇 FIX 3: Added 'h-fit' right at the beginning of this className */}
               <div key={min.name} className="h-fit relative group overflow-hidden rounded-xl border border-white/5 bg-black/20 backdrop-blur-sm cursor-pointer hover:border-white/20 transition-all">
