@@ -76,8 +76,150 @@ function App() {
     <div className="relative bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-50 min-h-screen selection:bg-blue-500/30 transition-colors duration-500">
       <GlacierScene onPhaseUpdate={setPhase} />
 
-      {/* --- TOP NAVIGATION (Original Fonts Restored) --- */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#020617]/80 backdrop-blur-xl pointer-events-auto">
+      {/* --- TOP NAVIGATION (Theme Aware) --- */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 dark:border-white/5 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl pointer-events-auto transition-colors duration-500">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+              <span className="text-white font-bold text-lg">G</span>
+            </div>
+            <span className="font-display font-bold text-lg tracking-wider uppercase text-slate-900 dark:text-white">Geo<span className="text-blue-500 dark:text-blue-400 italic font-medium text-base lowercase">Glacier</span></span>
+          </div>
+          
+          {/* Desktop Links & Mega Menus */}
+          <div className="hidden md:flex items-center gap-8">
+            
+            {/* 1. Topic Library */}
+            <div className="relative group">
+              <button 
+                onClick={() => {
+                  const el = document.getElementById('topics');
+                  el && window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+                }}
+                className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-4"
+              >
+                Topic Library <span className="text-[8px] opacity-50 group-hover:rotate-180 transition-transform">▼</span>
+              </button>
+              <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-[600px] invisible opacity-0 translate-y-4 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-[0_24px_80px_rgba(0,0,0,0.1)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] grid grid-cols-2 gap-8 text-left normal-case tracking-normal">
+                <div>
+                  <h4 className="text-[10px] font-mono text-blue-600 dark:text-blue-500 uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/10 pb-2">Foundational</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                      <span className="text-lg">💎</span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 transition-colors">Mineralogy</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Crystal systems, properties</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                      <span className="text-lg">🪨</span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 transition-colors">Petrology</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Igneous, sedimentary, metamorphic</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-[10px] font-mono text-blue-600 dark:text-blue-500 uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/10 pb-2">Applied</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                      <span className="text-lg">🌋</span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 transition-colors">Structural Geology</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Folds, faults, tectonics</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                      <span className="text-lg">🗺️</span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 transition-colors">Geomorphology</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Landforms, erosion cycles</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Quiz Hub */}
+            <div className="relative group">
+              <button className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-4">
+                Quiz Hub <span className="text-[8px] opacity-50 group-hover:rotate-180 transition-transform">▼</span>
+              </button>
+              <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-[240px] invisible opacity-0 translate-y-4 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-[0_24px_80px_rgba(0,0,0,0.1)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] space-y-2 text-left normal-case tracking-normal">
+                <div className="hover:bg-slate-50 dark:hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
+                  <span>📝</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-800 dark:text-slate-200">Topic Quiz</div>
+                    <div className="text-xs text-slate-500">Practice by subject</div>
+                  </div>
+                </div>
+                <div className="hover:bg-slate-50 dark:hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
+                  <span>⏱️</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-800 dark:text-slate-200">Mock Test</div>
+                    <div className="text-xs text-slate-500">Full simulation</div>
+                  </div>
+                  <span className="ml-auto text-[9px] uppercase font-bold bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded">Live</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Exam Corner */}
+            <button 
+              onClick={() => {
+                const el = document.getElementById('exams');
+                el && window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+              }}
+              className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-4"
+            >
+              Exam Corner
+            </button>
+
+            {/* 4. Glacier Lab */}
+            <button 
+              onClick={() => {
+                const el = document.getElementById('minerals');
+                el && window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+              }}
+              className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-4"
+            >
+              Glacier Lab
+            </button>
+
+          </div>
+
+          {/* Right Actions (Search, Quiz, Theme) */}
+          <div className="flex items-center gap-5">
+            {/* Theme Toggle Button */}
+            <button 
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="w-9 h-9 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+            >
+              {isDarkMode ? (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              )}
+            </button>
+
+            {/* Search Button */}
+            <button 
+              onClick={() => setIsSearchOpen(true)}
+              className="w-9 h-9 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </button>
+            <button className="hidden md:flex px-6 py-2 bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-white rounded-full text-[10px] font-mono uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-600/20 transition-all">
+              Start Quiz
+            </button>
+          </div>
+
+        </div>
+      </nav>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           
           {/* Logo */}
