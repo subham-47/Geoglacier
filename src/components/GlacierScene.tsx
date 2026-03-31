@@ -471,6 +471,34 @@ const emissiveBlack = new THREE.Color(0x000000);  // Dead ash (unchanged)
 
       particlesMaterial.opacity = 0.4 + Math.sin(elapsedTime * 5) * 0.2;
       particlesMesh.rotation.y = elapsedTime * 0.05;
+
+      // --- DYNAMIC WEATHER PARTICLES ---
+      const pPositions = particlesGeometry.attributes.position.array as Float32Array;
+      const currentPhase = material.uniforms.uPhase.value;
+      
+      for (let i = 0; i < particlesCount; i++) {
+        const i3 = i * 3;
+        
+        if (currentPhase < 0.8) {
+          // ICE PHASE: Falling Snow
+          pPositions[i3 + 1] -= deltaTime * (1.0 + Math.random());
+          particlesMaterial.color.setHex(0xffffff); // White
+        } else if (currentPhase > 1.2) {
+          // VOLCANO PHASE: Rising Ash / Embers
+          pPositions[i3 + 1] += deltaTime * (2.0 + Math.random() * 2.0);
+          particlesMaterial.color.setHex(Math.random() > 0.5 ? 0xff4400 : 0x222222); // Orange and Ash
+        } else {
+          // MOUNTAIN PHASE: Gentle floating
+          pPositions[i3 + 1] += Math.sin(elapsedTime * 2.0 + i) * 0.005;
+          particlesMaterial.color.setHex(0xaaddaa); // Soft green tint
+        }
+
+        // Loop particles when they go off screen
+        if (pPositions[i3 + 1] < -5) pPositions[i3 + 1] = 5;
+        if (pPositions[i3 + 1] > 5) pPositions[i3 + 1] = -5;
+      }
+      particlesGeometry.attributes.position.needsUpdate = true;
+      
       particlesMesh.position.y = Math.sin(elapsedTime * 0.2) * 0.5;
 
       // ... fountain physics ...
