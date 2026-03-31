@@ -73,7 +73,7 @@ function App() {
   }, []);
 
   return (
-    <div className="relative bg-[#020617] text-slate-50 min-h-screen selection:bg-blue-500/30">
+    <div className="relative bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-50 min-h-screen selection:bg-blue-500/30 transition-colors duration-500">
       <GlacierScene onPhaseUpdate={setPhase} />
 
       {/* --- TOP NAVIGATION (Original Fonts Restored) --- */}
