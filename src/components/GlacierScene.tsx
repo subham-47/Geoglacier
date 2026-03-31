@@ -393,7 +393,7 @@ scene.add(water);
         onPhaseUpdate(p);
 
         // --- 🌲 SYNCHRONIZED TREE GROWTH & SMOOTH FADE ---
-        const spreadMultiplier = 1.0 + (Math.max(0, p - 0.4) * 0.45); 
+        const spreadMultiplier = 1.0 + (Math.max(0, p - 0.4) * 0.2); 
 
         if (p > 0.35) { 
           // Update Tree Positions
