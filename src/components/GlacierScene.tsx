@@ -206,6 +206,77 @@ interface GlacierSceneProps {
   onPhaseUpdate: (phase: number) => void;
 }
 
+
+// particle system//
+//--------------------------------//
+const particleVertexShader = `
+  uniform float uTime;
+  uniform float uPhase;
+  attribute vec3 aRandom;
+  varying float vRandom;
+
+  void main() {
+    vRandom = aRandom.x;
+    vec3 pos = position;
+
+    float fallSpeed = mix(0.8, 4.5, smoothstep(0.0, 1.0, uPhase));
+    if (uPhase > 1.0) {
+        fallSpeed = mix(4.5, 1.2, smoothstep(1.0, 2.0, uPhase));
+    }
+
+    float drift = mix(0.6, 0.05, smoothstep(0.0, 1.0, uPhase));
+    if (uPhase > 1.0) {
+        drift = mix(0.05, 1.5, smoothstep(1.0, 2.0, uPhase));
+    }
+
+    pos.y -= uTime * fallSpeed * (0.5 + aRandom.y * 0.5);
+    pos.x += sin(uTime * 0.5 + aRandom.z * 10.0) * drift;
+    pos.z += cos(uTime * 0.3 + aRandom.x * 10.0) * drift;
+
+    pos.y = mod(pos.y + 10.0, 20.0) - 10.0;
+    pos.x = mod(pos.x + 10.0, 20.0) - 10.0;
+    pos.z = mod(pos.z + 10.0, 20.0) - 10.0;
+
+    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+    
+    float size = mix(0.08, 0.04, smoothstep(0.0, 1.0, uPhase));
+    if (uPhase > 1.0) {
+        size = mix(0.04, 0.1, smoothstep(1.0, 2.0, uPhase));
+    }
+    
+    gl_PointSize = size * (300.0 / -mvPosition.z);
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+const particleFragmentShader = `
+  uniform float uPhase;
+  varying float vRandom;
+
+  void main() {
+    float d = distance(gl_PointCoord, vec2(0.5));
+    if (d > 0.5) discard;
+
+    vec3 snowColor = vec3(0.9, 0.95, 1.0);
+    vec3 rainColor = vec3(0.4, 0.6, 0.9);
+    vec3 ashColor = mix(vec3(0.3, 0.3, 0.3), vec3(1.0, 0.4, 0.1), vRandom);
+
+    vec3 color;
+    if (uPhase <= 1.0) {
+        color = mix(snowColor, rainColor, uPhase);
+    } else {
+        color = mix(rainColor, ashColor, uPhase - 1.0);
+    }
+
+    float alpha = mix(0.7, 0.4, smoothstep(0.0, 1.0, uPhase));
+    if (uPhase > 1.0) {
+        alpha = mix(0.4, 0.9, smoothstep(1.0, 2.0, uPhase));
+    }
+
+    gl_FragColor = vec4(color, alpha * (1.0 - d * 2.0));
+  }
+`;
+
 export const GlacierScene: React.FC<GlacierSceneProps> = ({ onPhaseUpdate }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
