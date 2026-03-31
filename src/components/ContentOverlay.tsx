@@ -154,7 +154,100 @@ export default function ContentOverlay() {
             ))}
           </div>
         </section>
+        
+{/* --- PROFESSIONAL FOOTER --- */}
+        <footer className="w-full mt-32 border-t border-white/10 bg-slate-950/80 backdrop-blur-xl pointer-events-auto">
+          <div className="max-w-7xl mx-auto px-6 py-16">
+            
+            {/* Top Grid Area */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
+              
+              {/* Column 1: Brand & Mission (Takes up 4 columns) */}
+              <div className="lg:col-span-4 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                    <span className="text-white font-bold text-lg">G</span>
+                  </div>
+                  <span className="text-xl font-bold text-white tracking-widest uppercase">GeoGlacier</span>
+                </div>
+                <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
+                  The ultimate interactive ecosystem for earth science students. Master mineralogy, track PSU recruitments, and conquer your exams.
+                </p>
+                {/* Social Icons (Sleek hover effects) */}
+                <div className="flex gap-4 pt-2">
+                  <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-blue-600/20 hover:border-blue-500/50 hover:text-blue-400 transition-all text-slate-400">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                  </button>
+                  <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-blue-600/20 hover:border-blue-500/50 hover:text-blue-400 transition-all text-slate-400">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  </button>
+                </div>
+              </div>
 
+              {/* Column 2: Navigation Links */}
+              <div className="lg:col-span-2">
+                <h4 className="text-white font-semibold mb-6 tracking-wide text-sm">Platform</h4>
+                <ul className="space-y-4 text-sm text-slate-400">
+                  <li><button className="hover:text-blue-400 transition-colors">Mineral Lab</button></li>
+                  <li><button className="hover:text-blue-400 transition-colors">Topic Library</button></li>
+                  <li><button className="hover:text-blue-400 transition-colors">PYQ Archive</button></li>
+                  <li><button className="hover:text-blue-400 transition-colors">Exam Notifications</button></li>
+                </ul>
+              </div>
+
+              {/* Column 3: Legal & Support */}
+              <div className="lg:col-span-2">
+                <h4 className="text-white font-semibold mb-6 tracking-wide text-sm">Legal & Support</h4>
+                <ul className="space-y-4 text-sm text-slate-400">
+                  <li><button className="hover:text-white transition-colors">Privacy Policy</button></li>
+                  <li><button className="hover:text-white transition-colors">Terms of Service</button></li>
+                  <li><button className="hover:text-white transition-colors">Contact Us</button></li>
+                  <li><button className="hover:text-white transition-colors">Report a Bug</button></li>
+                </ul>
+              </div>
+
+              {/* Column 4: Newsletter (Takes up 4 columns) */}
+              <div className="lg:col-span-4">
+                <h4 className="text-white font-semibold mb-6 tracking-wide text-sm">Stay Updated</h4>
+                <p className="text-sm text-slate-400 mb-4 leading-relaxed">
+                  Join other geology aspirants. Get the latest study materials and exam alerts delivered to your inbox.
+                </p>
+                <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white w-full focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all placeholder:text-slate-600"
+                  />
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]">
+                    Subscribe
+                  </button>
+                </form>
+              </div>
+
+            </div>
+
+            {/* Bottom Bar: Copyright & Settings */}
+            <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-slate-500 text-sm">
+                © {new Date().getFullYear()} GeoGlacier. All rights reserved.
+              </p>
+              
+              <div className="flex items-center gap-6 text-sm text-slate-500">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span> 
+                  All systems operational
+                </span>
+                <button className="hover:text-white transition-colors flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                  Back to top
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </footer>
+
+        
       </div>
     </div>
   );
