@@ -20,7 +20,7 @@ const EXAMS: Exam[] = [
   { icon: '🎯', name: 'GATE Geology', full: 'Graduate Aptitude Test in Engineering', details: { Body: 'IITs', Freq: 'Annual (Feb)', Marks: '100 (65 Q)', Use: 'M.Tech, PSU jobs' } },
   { icon: '📘', name: 'IIT JAM Geology', full: 'Joint Admission Test for M.Sc.', details: { Body: 'IITs', Freq: 'Annual (Feb)', Marks: '100 (60 Q)', Use: 'M.Sc Admission' } },
   { icon: '🏛️', name: 'GSI Geologist', full: 'Geological Survey of India', details: { Body: 'UPSC', Freq: 'Annual', Stages: 'Written + Interview', Qual: 'M.Sc Geology' } },
-  { icon: '🛢️', name: 'ONGC Geologist', full: 'Oil & Natural Gas Corporation', details: { Recruit: 'GATE Score', Qual: 'M.Sc Geology', Grade: 'E1', Sector: 'Oil exploration' } },
+  { icon: '🏭', name: 'PSU Recruitment', full: 'ONGC, Coal India, NMDC, MECL',  details: { Recruit: 'GATE Score / CBT', Qual: 'M.Sc/M.Tech Geology', Grade: 'Executive (E1/E2)', Sectors: 'Energy, Mining, Oil'  } },
 ];
 
 const MINERALS: Mineral[] = [
