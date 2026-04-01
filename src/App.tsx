@@ -198,6 +198,7 @@ function App() {
 
               </div>
             </div>
+            </div>
 
           {/* Right Actions (Search & Quiz) */}
           <div className="flex items-center gap-5">
