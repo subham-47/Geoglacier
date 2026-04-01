@@ -171,17 +171,33 @@ function App() {
             </button>
 
             {/* 4. Glacier Lab */}
-            <button 
-              onClick={() => {
-                const el = document.getElementById('minerals');
-                el && window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
-              }}
-              className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400 hover:text-blue-400 transition-colors py-4"
-            >
-              Glacier Lab
-            </button>
+            <div className="relative group">
+              <button className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400 hover:text-blue-400 transition-colors py-4">
+                Glacier Lab <span className="text-[8px] opacity-50 group-hover:rotate-180 transition-transform">▼</span>
+              </button>
+              <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-[260px] invisible opacity-0 translate-y-4 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out bg-slate-950 border border-white/10 rounded-xl p-4 shadow-[0_24px_80px_rgba(0,0,0,0.8)] space-y-2 text-left normal-case tracking-normal">
+                
+                {/* Main Hub Link */}
+                <Link to="/lab" className="hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
+                  <span className="text-xl">🔬</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-200">Experimental Hub</div>
+                    <div className="text-xs text-slate-500">View all lab modules</div>
+                  </div>
+                </Link>
 
-          </div>
+                {/* Direct Link to Crystallography */}
+                <Link to="/lab/crystallography" className="hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-colors flex items-center gap-3">
+                  <span className="text-xl">💎</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-200">Crystallography 3D</div>
+                    <div className="text-xs text-slate-500">Interactive crystal viewer</div>
+                  </div>
+                  <span className="ml-auto text-[9px] uppercase font-bold bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">New</span>
+                </Link>
+
+              </div>
+            </div>
 
           {/* Right Actions (Search & Quiz) */}
           <div className="flex items-center gap-5">
