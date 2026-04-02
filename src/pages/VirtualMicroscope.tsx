@@ -32,10 +32,10 @@ const THIN_SECTIONS = [
     desc: 'Diagnostic polysynthetic twinning (zebra stripes) visible in XPL. Low relief in PPL.',
     extinctionAngle: 30, // Inclined extinction
     isPleochroic: false,
-    texturePPL: 'linear-gradient(to right, #f1f5f9, #e2e8f0)',
-    // Fake the twinning stripes using CSS repeating gradients!
-    textureXPL: 'repeating-linear-gradient(90deg, #94a3b8, #94a3b8 15px, #475569 15px, #475569 30px)'
+   imgPPL: '/minerals/quartz-ppl.jpg', 
+    imgXPL: '/minerals/quartz-xpl.jpg'  
   }
+  // ... update your other minerals exactly like this
 ];
 
 export default function VirtualMicroscope() {
