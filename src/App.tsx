@@ -98,13 +98,13 @@ function App() {
                 <div>
                   <h4 className="text-[10px] font-mono text-blue-500 uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Foundational</h4>
                   <div className="space-y-4">
-                    <div className="flex items-start gap-3 hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
+                    <Link to="/database" className="flex items-start gap-3 hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
                       <span className="text-lg">💎</span>
                       <div>
-                        <div className="text-sm font-bold text-slate-200 group-hover/link:text-blue-400 transition-colors">Mineralogy</div>
-                        <div className="text-xs text-slate-500 mt-0.5">Crystal systems, properties</div>
+                        <div className="text-sm font-bold text-slate-200 group-hover/link:text-blue-400 transition-colors">Mineral Database</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Searchable catalog & properties</div>
                       </div>
-                    </div>
+                    </Link>
                     <div className="flex items-start gap-3 hover:bg-white/5 p-2 -m-2 rounded-lg cursor-pointer transition-colors group/link">
                       <span className="text-lg">🪨</span>
                       <div>
