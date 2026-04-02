@@ -32,8 +32,8 @@ const THIN_SECTIONS = [
     desc: 'Diagnostic polysynthetic twinning (zebra stripes) visible in XPL. Low relief in PPL.',
     extinctionAngle: 30, // Inclined extinction
     isPleochroic: false,
-   imgPPL: '/minerals/quartz-ppl.jpg', 
-    imgXPL: '/minerals/quartz-xpl.jpg'  
+   imgPPL: '/minerals/plagioclase-ppl.jpg', 
+    imgXPL: '/minerals/plagioclase-xpl.jpg'  
   }
   // ... update your other minerals exactly like this
 ];
