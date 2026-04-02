@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 // Strict TypeScript Interfaces to prevent build errors
 interface Topic { id: string; icon: string; name: string; desc: string; count: string; status: string; }
