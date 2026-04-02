@@ -1,4 +1,5 @@
 import React from 'react';
+import { Menu, X } from 'lucide-react';
 import { Routes, Route, Link } from 'react-router-dom'
 import GlacierScene from './components/GlacierScene';
 import ContentOverlay from './components/ContentOverlay';
@@ -55,8 +56,14 @@ function App() {
   const [phase, setPhase] = React.useState(0);
 
   // --- SEARCH STATE & LOGIC ---
+  export default function App() {
+  // 1. Navigation State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  
+  // 2. Search State
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
+  // 3. Search Escape Key Logic
   React.useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsSearchOpen(false);
@@ -70,19 +77,57 @@ function App() {
       <GlacierScene onPhaseUpdate={setPhase} />
 
       {/* --- TOP NAVIGATION (Original Fonts Restored) --- */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#020617]/80 backdrop-blur-xl pointer-events-auto">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      {/* 1. TOP NAVIGATION BAR */}
+      <nav className="relative z-50 px-6 py-4 flex items-center justify-between border-b border-white/5 bg-[#020617]/80 backdrop-blur-md">
+        
+        {/* Logo/Brand */}
+        <Link to="/" className="font-display font-bold text-xl text-white tracking-wide">
+          Geo<span className="text-blue-500">Glacier</span>
+        </Link>
 
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)]">
-              <span className="text-white font-bold text-lg">G</span>
-            </div>
-            <span className="font-display font-bold text-lg tracking-wider uppercase">Geo<span className="text-blue-400 italic font-medium text-base lowercase">Glacier</span></span>
-          </div>
+        {/* Desktop Menu (Hidden on Mobile) */}
+        <div className="hidden md:flex items-center gap-8">
+          <Link to="/" className="text-sm font-bold text-slate-300 hover:text-blue-400 transition-colors">Home</Link>
+          <Link to="/lab" className="text-sm font-bold text-slate-300 hover:text-blue-400 transition-colors">Lab Hub</Link>
+          <Link to="/database" className="text-sm font-bold text-slate-300 hover:text-blue-400 transition-colors">Mineral Database</Link>
+        </div>
 
-          {/* Desktop Links & Mega Menus */}
-          <div className="hidden md:flex items-center gap-8">
+        {/* Mobile Hamburger Button (Hidden on Desktop) */}
+        <button 
+          className="md:hidden text-slate-400 hover:text-white p-2"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </nav>
+
+      {/* 2. MOBILE DROPDOWN MENU */}
+      {/* This only renders if isMobileMenuOpen is true AND we are on a small screen */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-[70px] left-0 w-full bg-slate-900/95 backdrop-blur-xl border-b border-white/10 z-40 p-6 flex flex-col gap-6 shadow-2xl">
+          <Link 
+            to="/" 
+            onClick={() => setIsMobileMenuOpen(false)} // Closes menu when clicked!
+            className="text-lg font-bold text-slate-200 hover:text-blue-400"
+          >
+            Home
+          </Link>
+          <Link 
+            to="/lab" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="text-lg font-bold text-slate-200 hover:text-blue-400"
+          >
+            Glacier Lab
+          </Link>
+          <Link 
+            to="/database" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="text-lg font-bold text-slate-200 hover:text-blue-400"
+          >
+            Mineral Database
+          </Link>
+        </div>
+      )}
 
             {/* 1. Topic Library */}
             <div className="relative group">
