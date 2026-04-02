@@ -385,6 +385,7 @@ export default function Root() {
       <Route path="/quiz/:topicId" element={<QuizPage />} />
       <Route path="/lab" element={<GlacierLabHub />} />
       <Route path="/lab/crystallography" element={<CrystalLab />} />
+      <Route path="/database" element={<MineralDatabase />} />
     </Routes>
   );
 }
