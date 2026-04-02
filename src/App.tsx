@@ -78,9 +78,9 @@ function App() {
       <GlacierScene onPhaseUpdate={setPhase} />
 {/* ... (Keep the rest of your HTML code exactly as it is below here) ... */}
 
-      {/* --- TOP NAVIGATION (Original Fonts Restored) --- */}
       {/* --- TOP NAVIGATION BAR --- */}
-      <nav className="relative z-50 px-6 py-4 flex items-center justify-between border-b border-white/5 bg-[#020617]/80 backdrop-blur-md">
+      {/* 🟢 CHANGED: "relative" is now "fixed top-0 left-0 w-full" */}
+      <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4 flex items-center justify-between border-b border-white/5 bg-[#020617]/80 backdrop-blur-md">
         
         {/* Logo/Brand */}
         <Link to="/" className="font-display font-bold text-xl text-white tracking-wide">
