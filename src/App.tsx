@@ -52,17 +52,19 @@ const phases = [
   },
 ];
 
+// ... (keep your phases array exactly as it is) ...
+
 function App() {
+  // 1. Glacier Phase State
   const [phase, setPhase] = React.useState(0);
 
-  // --- SEARCH STATE & LOGIC ---
-  // 1. Navigation State
+  // 2. Navigation State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   
-  // 2. Search State
+  // 3. Search State
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
-  // 3. Search Escape Key Logic
+  // 4. Search Escape Key Logic
   React.useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsSearchOpen(false);
@@ -74,6 +76,7 @@ function App() {
   return (
     <div className="relative bg-[#020617] text-slate-50 min-h-screen selection:bg-blue-500/30">
       <GlacierScene onPhaseUpdate={setPhase} />
+{/* ... (Keep the rest of your HTML code exactly as it is below here) ... */}
 
       {/* --- TOP NAVIGATION (Original Fonts Restored) --- */}
       {/* 1. TOP NAVIGATION BAR */}
