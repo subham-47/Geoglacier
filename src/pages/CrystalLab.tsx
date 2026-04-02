@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Maximize2, Rotate3d, Layers, Grid3x3, Play } from 'lucide-react';
+import CrystalScene from '../components/lab/CrystalScene';
 
 const CRYSTAL_SYSTEMS = [
   { id: 'isometric', name: 'Isometric', desc: 'a = b = c, α = β = γ = 90°' },
@@ -22,12 +23,16 @@ export default function CrystalLab() {
   return (
     <div className="relative w-full h-screen bg-[#020617] text-slate-50 overflow-hidden font-body">
       
-      {/* --- BACKGROUND (Placeholder for 3D) --- */}
+      {/* --- BACKGROUND 3D CANVAS --- */}
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#020617] to-slate-900">
-        <div className="absolute inset-0 flex items-center justify-center opacity-20">
-          <p className="font-mono tracking-[0.5em] text-slate-500 uppercase">3D Canvas Loading...</p>
-        </div>
-        {/* 🚀 Phase 3: The <Canvas> will go right here! */}
+        <CrystalScene 
+          activeSystem={activeSystem}
+          showAxes={showAxes}
+          showPlanes={showPlanes}
+          showRotation={showRotation}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
+        />
       </div>
 
       {/* --- TOP NAVIGATION BAR --- */}
