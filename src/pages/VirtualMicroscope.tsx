@@ -45,34 +45,38 @@ export default function VirtualMicroscope() {
 
   const activeMineral = THIN_SECTIONS.find(m => m.id === activeId)!;
 
-  // --- OPTICS SIMULATION ENGINE ---
+  // --- OPTICS SIMULATION ENGINE (UPGRADED FOR REAL IMAGES) ---
   const opticsStyle = useMemo(() => {
     const rad = (rotation - activeMineral.extinctionAngle) * (Math.PI / 180);
     
+    // Choose the real image based on which light is active
+    const currentImage = isXPL ? activeMineral.imgXPL : activeMineral.imgPPL;
+    
     if (isXPL) {
-      // In Cross-Polarized Light (XPL), minerals go completely dark every 90 degrees.
-      // Math.sin(2 * angle) gives us a curve that hits 0 at 0, 90, 180, 270.
+      // XPL: The real image still goes black every 90 degrees
       const intensity = Math.pow(Math.sin(2 * rad), 2);
-      // We clamp the minimum opacity to 0.05 so it doesn't vanish completely into the black stage.
-      const opacity = Math.max(0.05, intensity);
+      const opacity = Math.max(0.08, intensity); // Never goes 100% black, keeps a tiny bit of visibility
       
       return {
-        background: activeMineral.textureXPL,
-        opacity: opacity,
+        backgroundImage: `url(${currentImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        opacity: opacity, // This creates the extinction effect!
         transform: `rotate(${rotation}deg)`
       };
     } else {
-      // In Plane-Polarized Light (PPL), brightness stays mostly constant.
+      // PPL: The real image rotates, and changes brightness if pleochroic
       let filter = 'none';
       if (activeMineral.isPleochroic) {
-        // Pleochroic minerals change color/darkness as they rotate relative to the lower polarizer.
         const pleoIntensity = Math.abs(Math.cos(rad));
-        filter = `brightness(${0.7 + pleoIntensity * 0.5}) saturate(${1 + pleoIntensity})`;
+        filter = `brightness(${0.8 + pleoIntensity * 0.3}) saturate(${1 + pleoIntensity * 0.2})`;
       }
       return {
-        background: activeMineral.texturePPL,
-        opacity: 0.95,
-        filter: filter,
+        backgroundImage: `url(${currentImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        opacity: 1,
+        filter: filter, // This creates the color-changing pleochroism effect!
         transform: `rotate(${rotation}deg)`
       };
     }
