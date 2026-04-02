@@ -10,6 +10,7 @@ import QuizPage from './pages/QuizPage';
 import GlacierLabHub from './pages/GlacierLabHub';
 import CrystalLab from './pages/CrystalLab';
 import MineralDatabase from './pages/MineralDatabase';
+import VirtualMicroscope from './pages/VirtualMicroscope';
 
 const phases = [
   {
@@ -386,6 +387,7 @@ export default function Root() {
       <Route path="/lab" element={<GlacierLabHub />} />
       <Route path="/lab/crystallography" element={<CrystalLab />} />
       <Route path="/database" element={<MineralDatabase />} />
+      <Route path="/lab/petrology" element={<VirtualMicroscope />} />
     </Routes>
   );
 }
