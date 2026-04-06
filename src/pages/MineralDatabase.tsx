@@ -61,6 +61,9 @@ export default function MineralDatabase() {
     system: 'All',
     minHardness: 0
   });
+  // State for the Optical Inspector Modal
+  const [selectedMineral, setSelectedMineral] = useState<any | null>(null);
+  
 
   // --- 3. CONSTRAINT SOLVER ---
   const filteredResults = useMemo(() => {
@@ -169,7 +172,11 @@ export default function MineralDatabase() {
         {/* The Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {filteredResults.map(m => (
-            <div key={m.id} className="relative p-6 rounded-2xl border border-white/5 bg-slate-900/40 backdrop-blur-sm hover:border-blue-500/30 hover:bg-slate-900/60 transition-all group cursor-pointer">
+            <div 
+              key={m.id} 
+              onClick={() => setSelectedMineral(m)}
+              className="relative p-6 rounded-2xl border border-white/5 bg-slate-900/40 backdrop-blur-sm hover:border-blue-500/30 hover:bg-slate-900/60 transition-all group cursor-pointer"
+            >
               
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -209,6 +216,98 @@ export default function MineralDatabase() {
           )}
         </div>
       </main>
+
+      {/* --- STEP 2: THE THIN SECTION OPTICAL MODAL --- */}
+      {selectedMineral && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#020617]/80 backdrop-blur-md">
+          <div className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Close Button */}
+            <button 
+              onClick={() => setSelectedMineral(null)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-slate-400 hover:text-white hover:bg-red-500/50 transition-all"
+            >
+              ✕
+            </button>
+
+            {/* Left: Petrographic View Simulator */}
+            <div className="w-full md:w-2/5 bg-black p-8 flex flex-col items-center justify-center relative border-r border-white/5">
+              <div className="absolute top-4 left-4 text-[10px] font-mono text-blue-500 tracking-widest uppercase flex items-center gap-2">
+                <Microscope className="w-3 h-3" /> Petrographic Stage
+              </div>
+              
+              {/* Simulated Microscope Stage */}
+              <div className="w-48 h-48 rounded-full border-4 border-slate-800 bg-slate-950 shadow-[0_0_50px_rgba(0,0,0,1)] flex items-center justify-center relative overflow-hidden mb-6">
+                <div className="absolute inset-0 border border-white/10 rounded-full pointer-events-none z-20"></div>
+                {/* Crosshairs */}
+                <div className="w-full h-[1px] bg-white/20 absolute z-10"></div>
+                <div className="h-full w-[1px] bg-white/20 absolute z-10"></div>
+                {/* Simulated Mineral Graphic - dynamically changes color based on Birefringence data! */}
+                <div 
+                  className="w-32 h-32 rounded-lg rotate-12 opacity-80 mix-blend-screen"
+                  style={{
+                    background: selectedMineral.optical.birefringence > 0.03 
+                      ? 'linear-gradient(45deg, #f472b6, #34d399, #fbbf24)' // High order colors (e.g., Olivine, Calcite)
+                      : 'linear-gradient(45deg, #9ca3af, #d1d5db)'          // 1st order greys (e.g., Quartz)
+                  }}
+                ></div>
+              </div>
+              
+              <div className="text-center w-full">
+                <div className="text-sm font-bold text-white mb-1">Optical Signatures</div>
+                <div className="text-xs text-slate-400 flex justify-between border-b border-white/5 py-1.5">
+                  <span>Birefringence (δ)</span>
+                  <span className="font-mono text-blue-300">{selectedMineral.optical.birefringence}</span>
+                </div>
+                <div className="text-xs text-slate-400 flex justify-between border-b border-white/5 py-1.5">
+                  <span>Extinction</span>
+                  <span className="text-blue-300">{selectedMineral.optical.extinction}</span>
+                </div>
+                <div className="text-xs text-slate-400 flex justify-between py-1.5">
+                  <span>Relief</span>
+                  <span className="text-blue-300">{selectedMineral.optical.relief}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Data Inspector */}
+            <div className="w-full md:w-3/5 p-8 bg-slate-900/50 overflow-y-auto">
+              <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-2">{selectedMineral.class} • {selectedMineral.subclass}</div>
+              <h2 className="text-3xl font-display font-black text-white mb-1">{selectedMineral.name}</h2>
+              <div className="font-mono text-sm text-blue-400 mb-8">{selectedMineral.chemistry.formula}</div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 pb-2 border-b border-white/5">Physical Data</h4>
+                  <ul className="space-y-3 text-sm text-slate-400">
+                    <li className="flex justify-between"><span>Crystal System</span> <strong className="text-white">{selectedMineral.structure.system}</strong></li>
+                    <li className="flex justify-between"><span>Hardness ($H$)</span> <strong className="text-white">{selectedMineral.physical.hardness.min}{selectedMineral.physical.hardness.min !== selectedMineral.physical.hardness.max ? ` - ${selectedMineral.physical.hardness.max}` : ''}</strong></li>
+                    <li className="flex justify-between"><span>Specific Gravity</span> <strong className="text-white">{selectedMineral.physical.sg}</strong></li>
+                    <li className="flex justify-between"><span>Cleavage</span> <strong className="text-white">{selectedMineral.physical.cleavage}</strong></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 pb-2 border-b border-white/5">Genesis & Environment</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMineral.genesis.map((env: string) => (
+                      <span key={env} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded text-xs text-slate-300">{env}</span>
+                    ))}
+                  </div>
+                  <div className="mt-6">
+                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 pb-2 border-b border-white/5">Chemistry Elements</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedMineral.chemistry.elements.map((el: string) => (
+                         <span key={el} className="w-7 h-7 flex items-center justify-center bg-blue-900/30 border border-blue-500/30 rounded text-xs font-mono text-blue-300">{el}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
