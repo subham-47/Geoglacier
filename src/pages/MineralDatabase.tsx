@@ -1,6 +1,27 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, FlaskConical, Microscope, Layers, Activity } from 'lucide-react';
+import { ChevronLeft, FlaskConical, Microscope, Layers, Activity, Search } from 'lucide-react';
+
+// --- INTELLIGENCE: The Chemical Parser ---
+// Converts formula strings into machine-readable elemental proportions (e.g. Mg₂SiO₄ -> { Mg: 2, Si: 1, O: 4 })
+const parseChemicalFormula = (formula: string) => {
+  const regex = /([A-Z][a-z]?)([₀-₉0-9]*)/g;
+  const proportions: Record<string, number> = {};
+  // Map standard unicode subscripts to readable numbers
+  const subMap: Record<string, string> = { '₀':'0', '₁':'1', '₂':'2', '₃':'3', '₄':'4', '₅':'5', '₆':'6', '₇':'7', '₈':'8', '₉':'9' };
+
+  let match;
+  while ((match = regex.exec(formula)) !== null) {
+    const element = match[1];
+    let qtyStr = match[2];
+    if (qtyStr && subMap[qtyStr[0]]) {
+       qtyStr = Array.from(qtyStr).map(c => subMap[c] || c).join('');
+    }
+    proportions[element] = (proportions[element] || 0) + (qtyStr ? parseInt(qtyStr, 10) : 1);
+  }
+  return proportions;
+};
+
 
 // --- 1. THE NEW ONTOLOGY (KNOWLEDGE GRAPH) ---
 const KNOWLEDGE_GRAPH = [
@@ -63,12 +84,14 @@ export default function MineralDatabase() {
   });
   // State for the Optical Inspector Modal
   const [selectedMineral, setSelectedMineral] = useState<any | null>(null);
-  
+
+  // State for Smart Chemical Search
+  const [searchQuery, setSearchQuery] = useState('');
 
   // --- 3. CONSTRAINT SOLVER ---
   const filteredResults = useMemo(() => {
     return KNOWLEDGE_GRAPH.filter(m => {
-      // Logic A: Elements (If any selected, mineral MUST contain all of them)
+      // Logic A: Elements
       const elMatch = filters.elements.length === 0 || 
         filters.elements.every(e => m.chemistry.elements.includes(e));
       
@@ -78,9 +101,22 @@ export default function MineralDatabase() {
       // Logic C: Mohs Hardness
       const hardMatch = m.physical.hardness.min >= filters.minHardness;
 
-      return elMatch && sysMatch && hardMatch;
+      // Logic D: Smart Search (Parses names, classes, and chemical components)
+      let searchMatch = true;
+      if (searchQuery.trim() !== '') {
+        const q = searchQuery.toLowerCase();
+        // Check if user typed an exact element symbol (e.g., "Fe" or "Mg")
+        const isExactElement = m.chemistry.elements.some(el => el.toLowerCase() === q);
+        searchMatch = 
+          m.name.toLowerCase().includes(q) || 
+          m.class.toLowerCase().includes(q) || 
+          m.chemistry.formula.toLowerCase().includes(q) ||
+          isExactElement;
+      }
+
+      return elMatch && sysMatch && hardMatch && searchMatch;
     });
-  }, [filters]);
+  }, [filters, searchQuery]);
 
   return (
     <div className="flex h-screen bg-[#020617] text-slate-200 font-body overflow-hidden">
@@ -162,11 +198,25 @@ export default function MineralDatabase() {
 
       {/* RIGHT PANEL: The Exploration Grid */}
       <main className="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top_right,#0f172a,#020617)] p-8 md:p-12">
-        <header className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-display font-black mb-3">Ontology <span className="text-blue-500">Explorer</span></h1>
-          <p className="text-slate-400 text-sm flex items-center gap-3">
-            Intersecting <strong className="text-white bg-white/10 px-2 py-0.5 rounded">{filteredResults.length}</strong> geological nodes based on active constraints.
-          </p>
+        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-display font-black mb-3">Ontology <span className="text-blue-500">Explorer</span></h1>
+            <p className="text-slate-400 text-sm flex items-center gap-3">
+              Intersecting <strong className="text-white bg-white/10 px-2 py-0.5 rounded">{filteredResults.length}</strong> geological nodes based on active constraints.
+            </p>
+          </div>
+          
+          {/* Smart Search Bar */}
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input 
+              type="text" 
+              placeholder="Search mineral, class, or element..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-900/80 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
+            />
+          </div>
         </header>
 
         {/* The Grid */}
@@ -188,8 +238,18 @@ export default function MineralDatabase() {
                 </div>
               </div>
 
-              <div className="font-mono text-sm text-blue-300 bg-blue-950/30 inline-block px-3 py-1.5 rounded-md border border-blue-500/10 mb-6">
-                {m.chemistry.formula}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="font-mono text-sm text-blue-300 bg-blue-950/30 inline-block px-3 py-1.5 rounded-md border border-blue-500/10">
+                  {m.chemistry.formula}
+                </div>
+                {/* Dynamically parsed chemistry display from our Regex Engine! */}
+                <div className="flex gap-1">
+                  {Object.entries(parseChemicalFormula(m.chemistry.formula)).map(([el, qty]) => (
+                    <span key={el} className="text-[9px] font-mono font-bold text-slate-400 bg-slate-800/50 px-1.5 py-0.5 rounded border border-white/5">
+                      {el}<span className="text-blue-500">{qty > 1 ? qty : ''}</span>
+                    </span>
+                  ))}
+                </div>
               </div>
 
               {/* Optical Snapshot (Preview for Step 2) */}
