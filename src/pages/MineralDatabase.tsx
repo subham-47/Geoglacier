@@ -321,20 +321,26 @@ export default function MineralDatabase() {
               
               <div className="text-center w-full">
                 <div className="text-sm font-bold text-white mb-1">Optical Signatures</div>
+                
                 <div className="text-xs text-slate-400 flex justify-between border-b border-white/5 py-1.5">
                   <span>Birefringence (δ)</span>
-                  <span className="font-mono text-blue-300">{selectedMineral.optical.birefringence}</span>
+                  <span className="font-mono text-blue-300">
+                    {selectedMineral.isSeries 
+                      ? ((selectedMineral.series.memberA.bi * (1 - seriesValue/100)) + (selectedMineral.series.memberB.bi * (seriesValue/100))).toFixed(3)
+                      : selectedMineral.optical.birefringence}
+                  </span>
                 </div>
+                
                 <div className="text-xs text-slate-400 flex justify-between border-b border-white/5 py-1.5">
                   <span>Extinction</span>
                   <span className="text-blue-300">{selectedMineral.optical.extinction}</span>
                 </div>
+                
                 <div className="text-xs text-slate-400 flex justify-between py-1.5">
                   <span>Relief</span>
                   <span className="text-blue-300">{selectedMineral.optical.relief}</span>
                 </div>
               </div>
-            </div>
 
             {/* Right: Data Inspector */}
             <div className="w-full md:w-3/5 p-8 bg-slate-900/50 overflow-y-auto">
