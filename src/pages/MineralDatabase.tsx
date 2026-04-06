@@ -89,13 +89,13 @@ export default function MineralDatabase() {
   const [selectedMineral, setSelectedMineral] = useState<any | null>(null);
   const [seriesValue, setSeriesValue] = useState(0); // For Solid Solution Slider (0-100)
 
-  // State for Smart Chemical Search
-  const [searchQuery, setSearchQuery] = useState('');
-  
   // State for Compare Mode
   const [compareQueue, setCompareQueue] = useState<any[]>([]);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   const [isCompareMode, setIsCompareMode] = useState(false); // Controls the Selection UI
+
+  // State for Smart Chemical Search
+  const [searchQuery, setSearchQuery] = useState('');
 
   // --- 3. CONSTRAINT SOLVER ---
   const filteredResults = useMemo(() => {
@@ -110,7 +110,7 @@ export default function MineralDatabase() {
       // Logic C: Mohs Hardness
       const hardMatch = m.physical.hardness.min >= filters.minHardness;
 
-      // Logic D: Smart Search (Parses names, classes, and chemical components)
+      // Logic D: Smart Search
       let searchMatch = true;
       if (searchQuery.trim() !== '') {
         const q = searchQuery.toLowerCase();
@@ -131,7 +131,6 @@ export default function MineralDatabase() {
       
       {/* LEFT PANEL: The Constraint Facets */}
       <aside className="w-80 border-r border-white/10 p-6 overflow-y-auto space-y-8 bg-slate-950 flex flex-col shadow-2xl z-10">
-        
         <nav className="mb-4">
           <Link to="/" className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
             <ChevronLeft className="w-4 h-4" /> Back to Hub
@@ -215,7 +214,6 @@ export default function MineralDatabase() {
           </div>
           
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
-            {/* Smart Search Bar (Works during Compare Mode too!) */}
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input 
@@ -227,7 +225,6 @@ export default function MineralDatabase() {
               />
             </div>
 
-            {/* Compare Mode Toggle UI */}
             {isCompareMode ? (
               <div className="flex items-center gap-3 w-full sm:w-auto bg-slate-900 border border-amber-500/50 p-1.5 rounded-xl animate-in fade-in slide-in-from-right-4">
                 <span className="text-xs font-bold text-amber-400 px-3 whitespace-nowrap">
@@ -269,14 +266,12 @@ export default function MineralDatabase() {
               key={m.id} 
               onClick={() => { 
                 if (isCompareMode) {
-                  // If in compare mode, clicking acts like a checkbox
                   if (isSelectedForCompare) {
                     setCompareQueue(compareQueue.filter(c => c.id !== m.id));
                   } else if (compareQueue.length < 4) {
                     setCompareQueue([...compareQueue, m]);
                   }
                 } else {
-                  // Normal mode opens the Petrographic stage
                   setSelectedMineral(m); 
                   setSeriesValue(0); 
                 }
@@ -289,14 +284,12 @@ export default function MineralDatabase() {
                   : 'border-white/5 bg-slate-900/40 hover:border-blue-500/30 hover:bg-slate-900/60'
               }`}
             >
-              
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-xl font-display font-bold text-white mb-1">{m.name}</h3>
                   <div className="text-[10px] uppercase tracking-widest text-slate-500">{m.class} • {m.subclass}</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {/* Dynamic Checkbox that only appears in Compare Mode */}
                   {isCompareMode && (
                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelectedForCompare ? 'bg-amber-500 border-amber-500 text-amber-950' : 'border-slate-600'}`}>
                       {isSelectedForCompare && <span className="text-sm font-bold">✓</span>}
@@ -312,7 +305,6 @@ export default function MineralDatabase() {
                 <div className="font-mono text-sm text-blue-300 bg-blue-950/30 inline-block px-3 py-1.5 rounded-md border border-blue-500/10">
                   {m.chemistry.formula}
                 </div>
-                {/* Dynamically parsed chemistry display from our Regex Engine! */}
                 <div className="flex gap-1 flex-wrap">
                   {Object.entries(parseChemicalFormula(m.chemistry.formula)).map(([el, qty]) => (
                     <span key={el} className="text-[9px] font-mono font-bold text-slate-400 bg-slate-800/50 px-1.5 py-0.5 rounded border border-white/5">
@@ -335,7 +327,8 @@ export default function MineralDatabase() {
               </div>
 
             </div>
-          ))}
+            );
+          })}
 
           {filteredResults.length === 0 && (
             <div className="col-span-full py-20 text-center border border-dashed border-white/10 rounded-2xl">
@@ -348,11 +341,10 @@ export default function MineralDatabase() {
       </main>
 
       {/* --- THE THIN SECTION OPTICAL MODAL --- */}
-      {selectedMineral && (
+      {selectedMineral && !isCompareMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#020617]/80 backdrop-blur-md">
           <div className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-200">
             
-            {/* Close Button */}
             <button 
               onClick={() => setSelectedMineral(null)}
               className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-slate-400 hover:text-white hover:bg-red-500/50 transition-all"
@@ -366,13 +358,10 @@ export default function MineralDatabase() {
                 <Microscope className="w-3 h-3" /> Petrographic Stage
               </div>
               
-              {/* Simulated Microscope Stage */}
               <div className="w-48 h-48 rounded-full border-4 border-slate-800 bg-slate-950 shadow-[0_0_50px_rgba(0,0,0,1)] flex items-center justify-center relative overflow-hidden mb-6">
                 <div className="absolute inset-0 border border-white/10 rounded-full pointer-events-none z-20"></div>
-                {/* Crosshairs */}
                 <div className="w-full h-[1px] bg-white/20 absolute z-10"></div>
                 <div className="h-full w-[1px] bg-white/20 absolute z-10"></div>
-                {/* Simulated Mineral Graphic - dynamically changes color based on Birefringence data! */}
                 <div 
                   className="w-32 h-32 rounded-lg rotate-12 opacity-80 mix-blend-screen"
                   style={{
@@ -413,7 +402,6 @@ export default function MineralDatabase() {
               <h2 className="text-3xl font-display font-black text-white mb-1">{selectedMineral.name}</h2>
               <div className="font-mono text-sm text-blue-400 mb-6">{selectedMineral.chemistry.formula}</div>
 
-              {/* --- DYNAMIC SOLID SOLUTION SIMULATOR --- */}
               {selectedMineral.isSeries && (
                 <div className="mb-8 p-5 bg-slate-950/50 border border-white/10 rounded-xl shadow-inner">
                   <div className="flex justify-between items-center mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
@@ -486,9 +474,7 @@ export default function MineralDatabase() {
         </div>
       )}
 
-      {/* --- STEP 5: DYNAMIC MULTI-COMPARE MODE --- */}
-      
-           {/* The Dynamic Multi-Compare Modal */}
+      {/* --- THE DYNAMIC MULTI-COMPARE MODAL --- */}
       {isCompareModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-[#020617]/90 backdrop-blur-xl overflow-y-auto">
           <div className="relative w-full max-w-6xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 my-auto">
@@ -498,7 +484,7 @@ export default function MineralDatabase() {
                 <Scale className="w-5 h-5 text-amber-400" /> Diagnostic Comparison ({compareQueue.length})
               </h2>
               <button 
-                onClick={() => { setIsCompareModalOpen(false); setCompareQueue([]); }} 
+                onClick={() => { setIsCompareModalOpen(false); setCompareQueue([]); setIsCompareMode(false); }} 
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-slate-400 hover:text-white hover:bg-red-500/50 transition-all"
               >
                 ✕
@@ -506,11 +492,10 @@ export default function MineralDatabase() {
             </div>
 
             <div 
-              className="grid divide-x divide-white/10" 
+              className="grid divide-x divide-y md:divide-y-0 divide-white/10" 
               style={{ gridTemplateColumns: `repeat(${compareQueue.length}, minmax(0, 1fr))` }}
             >
               {compareQueue.map((m) => {
-                // Find the absolute highest and lowest values across ALL selected minerals
                 const maxHardness = Math.max(...compareQueue.map(c => c.physical.hardness.min));
                 const minHardness = Math.min(...compareQueue.map(c => c.physical.hardness.min));
                 
