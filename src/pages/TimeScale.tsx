@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Clock, Skull, Wind, Target } from 'lucide-react';
+import { ChevronLeft, Clock, Skull, Wind, Target, Search, MessageSquare, Send, X, Sparkles } from 'lucide-react';
 
 // --- ENRICHED TIME SCALE DATA ---
 const TIME_DATA = [
@@ -65,104 +65,238 @@ const TIME_DATA = [
 
 export default function TimeScale() {
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
+  
+  // --- NEW: Smart Search & Chat State ---
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [messages, setMessages] = useState([
+    { role: 'assistant', text: 'Hello! I am GeoChat. Ask me anything about the geological timeline, mass extinctions, or specific time periods!' }
+  ]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Handle Mock Chat Submission
+  const handleSendMessage = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!chatInput.trim()) return;
+
+    // Add user message
+    const newMessages = [...messages, { role: 'user', text: chatInput }];
+    setMessages(newMessages);
+    setChatInput('');
+
+    // Simulate AI Response (In the future, hook this up to your API!)
+    setTimeout(() => {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        text: `That is a great question! In the final version of the site, I will be connected to an LLM API to give you a detailed geological breakdown about "${newMessages[newMessages.length-1].text}".` 
+      }]);
+    }, 1000);
+  };
+
+  // Open chat and pre-fill a question about a specific period
+  const askAIAboutPeriod = (periodName: string) => {
+    setSelectedPeriod(null); // Close the modal
+    setIsChatOpen(true);     // Open the chat
+    setChatInput(`What were the most important geological and biological events during the ${periodName}?`);
+  };
 
   return (
-    <div className="flex flex-col h-screen bg-[#020617] text-slate-200 font-body overflow-hidden">
+    <div className="flex h-screen bg-[#020617] text-slate-200 font-body overflow-hidden">
       
-      {/* Header */}
-      <header className="p-8 md:px-12 md:pt-12 md:pb-6 border-b border-white/5 bg-slate-950/50 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 shrink-0 z-10 shadow-xl">
-        <div>
-          <nav className="mb-4">
-            <Link to="/" className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
-              <ChevronLeft className="w-4 h-4" /> Back to Lab
-            </Link>
-          </nav>
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-blue-500 mb-2 flex items-center gap-2">
-            <Clock className="w-4 h-4" /> Glacier Lab Interactive
+      {/* MAIN CONTENT AREA */}
+      <div className={`flex flex-col flex-1 transition-all duration-300 ${isChatOpen ? 'mr-80 md:mr-96' : 'mr-0'}`}>
+        
+        {/* Header */}
+        <header className="p-6 md:px-12 md:pt-12 md:pb-6 border-b border-white/5 bg-slate-950/50 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 shrink-0 z-10 shadow-xl">
+          <div>
+            <nav className="mb-4">
+              <Link to="/" className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
+                <ChevronLeft className="w-4 h-4" /> Back to Lab
+              </Link>
+            </nav>
+            <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-blue-500 mb-2 flex items-center gap-2">
+              <Clock className="w-4 h-4" /> Glacier Lab Interactive
+            </div>
+            <h1 className="text-4xl md:text-5xl font-display font-black">Geological <span className="text-blue-400 italic">Time Scale</span></h1>
           </div>
-          <h1 className="text-4xl md:text-5xl font-display font-black">Geological <span className="text-blue-400 italic">Time Scale</span></h1>
-        </div>
-        <p className="text-sm text-slate-400 max-w-sm md:text-right border-l md:border-l-0 md:border-r-2 border-blue-500/30 pl-4 md:pl-0 md:pr-4">
-          Scroll right to travel back in time. Click any period to analyze index fossils, atmospheric conditions, and extinction events.
-        </p>
-      </header>
-
-      {/* Main Timeline Board */}
-      <main className="flex-1 overflow-x-auto overflow-y-hidden bg-[radial-gradient(ellipse_at_bottom,#0f172a,#020617)] p-8 md:p-12 cursor-grab active:cursor-grabbing relative">
-        <div className="inline-flex flex-col gap-4 min-w-max h-full justify-center pb-20">
           
-          {TIME_DATA.map((eon, eIdx) => (
-            <div key={eIdx} className="flex rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 backdrop-blur-sm">
-              
-              {/* Eon Label (Vertical) */}
-              <div 
-                className="w-16 flex flex-col items-center justify-center border-r border-white/10 shrink-0"
-                style={{ backgroundColor: `${eon.eon_color}40` }}
-              >
-                <span 
-                  className="font-display font-black text-xl tracking-widest uppercase -rotate-180" 
-                  style={{ writingMode: 'vertical-rl', color: eon.eon === 'Phanerozoic' ? '#93c5fd' : '#86efac' }}
+          {/* Smart Search & Chat Controls */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input 
+                type="text" 
+                placeholder="Search events, fossils..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-900/80 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
+              />
+            </div>
+            <button 
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${
+                isChatOpen 
+                  ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_20px_rgba(79,70,229,0.4)]' 
+                  : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Sparkles className="w-4 h-4" /> {isChatOpen ? 'Close Chat' : 'GeoChat AI'}
+            </button>
+          </div>
+        </header>
+
+        {/* Main Timeline Board */}
+        <main className="flex-1 overflow-x-auto overflow-y-hidden bg-[radial-gradient(ellipse_at_bottom,#0f172a,#020617)] p-8 md:p-12 cursor-grab active:cursor-grabbing relative">
+          <div className="inline-flex flex-col gap-4 min-w-max h-full justify-center pb-20">
+            
+            {TIME_DATA.map((eon, eIdx) => (
+              <div key={eIdx} className="flex rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 backdrop-blur-sm">
+                
+                {/* Eon Label (Vertical) */}
+                <div 
+                  className="w-16 flex flex-col items-center justify-center border-r border-white/10 shrink-0"
+                  style={{ backgroundColor: `${eon.eon_color}40` }}
                 >
-                  {eon.eon}
-                </span>
-              </div>
+                  <span 
+                    className="font-display font-black text-xl tracking-widest uppercase -rotate-180" 
+                    style={{ writingMode: 'vertical-rl', color: eon.eon === 'Phanerozoic' ? '#93c5fd' : '#86efac' }}
+                  >
+                    {eon.eon}
+                  </span>
+                </div>
 
-              {/* Eras Container */}
-              <div className="flex flex-col divide-y divide-white/10">
-                {eon.eras.map((era, eraIdx) => (
-                  <div key={eraIdx} className="flex">
-                    
-                    {/* Era Label (Vertical) */}
-                    <div 
-                      className="w-12 flex items-center justify-center border-r border-white/10 shrink-0"
-                      style={{ backgroundColor: `${era.color}40` }}
-                    >
-                      <span 
-                        className="font-bold text-xs tracking-widest uppercase -rotate-180 text-white/50" 
-                        style={{ writingMode: 'vertical-rl' }}
+                {/* Eras Container */}
+                <div className="flex flex-col divide-y divide-white/10">
+                  {eon.eras.map((era, eraIdx) => (
+                    <div key={eraIdx} className="flex">
+                      
+                      {/* Era Label (Vertical) */}
+                      <div 
+                        className="w-12 flex items-center justify-center border-r border-white/10 shrink-0"
+                        style={{ backgroundColor: `${era.color}40` }}
                       >
-                        {era.era}
-                      </span>
-                    </div>
-
-                    {/* Periods Row */}
-                    <div className="flex divide-x divide-white/10">
-                      {era.periods.map((period, pIdx) => (
-                        <div 
-                          key={pIdx} 
-                          onClick={() => setSelectedPeriod({ ...period, era: era.era, eon: eon.eon })}
-                          className="w-64 p-6 flex flex-col justify-between cursor-pointer group transition-all hover:bg-white/5 relative overflow-hidden"
-                          style={{ backgroundColor: `${period.color}20` }}
+                        <span 
+                          className="font-bold text-xs tracking-widest uppercase -rotate-180 text-white/50" 
+                          style={{ writingMode: 'vertical-rl' }}
                         >
-                          {/* Hover Glow Effect */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                          
-                          <div className="relative z-10">
-                            <h4 
-                              className="font-display font-bold text-2xl mb-1 group-hover:scale-105 transition-transform origin-left"
-                              style={{ color: period.color === '#8b3a12' ? '#fbbf24' : '#86efac' }}
-                            >
-                              {period.name}
-                            </h4>
-                            <div className="font-mono text-xs text-slate-400 bg-black/30 w-fit px-2 py-1 rounded border border-white/5 mb-4">
-                              {period.time}
-                            </div>
-                            <p className="text-sm text-slate-300 line-clamp-3 leading-relaxed">
-                              {period.desc}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                          {era.era}
+                        </span>
+                      </div>
 
-                  </div>
-                ))}
+                      {/* Periods Row */}
+                      <div className="flex divide-x divide-white/10">
+                        {era.periods.map((period, pIdx) => {
+                          
+                          // Smart Search Filtering Logic
+                          const q = searchQuery.toLowerCase();
+                          const matchesSearch = q === '' || 
+                            period.name.toLowerCase().includes(q) || 
+                            period.desc.toLowerCase().includes(q) || 
+                            period.fossils.toLowerCase().includes(q);
+
+                          return (
+                            <div 
+                              key={pIdx} 
+                              onClick={() => setSelectedPeriod({ ...period, era: era.era, eon: eon.eon })}
+                              className={`w-64 p-6 flex flex-col justify-between cursor-pointer group transition-all duration-300 relative overflow-hidden ${
+                                matchesSearch ? 'opacity-100 hover:bg-white/5' : 'opacity-20 grayscale hover:opacity-40'
+                              }`}
+                              style={{ backgroundColor: `${period.color}20` }}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                              
+                              <div className="relative z-10">
+                                <h4 
+                                  className="font-display font-bold text-2xl mb-1 group-hover:scale-105 transition-transform origin-left"
+                                  style={{ color: period.color === '#8b3a12' ? '#fbbf24' : '#86efac' }}
+                                >
+                                  {period.name}
+                                </h4>
+                                <div className="font-mono text-xs text-slate-400 bg-black/30 w-fit px-2 py-1 rounded border border-white/5 mb-4">
+                                  {period.time}
+                                </div>
+                                <p className="text-sm text-slate-300 line-clamp-3 leading-relaxed">
+                                  {period.desc}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+          </div>
+        </main>
+      </div>
+
+      {/* --- SIDEBAR: GEO-CHAT AI --- */}
+      <div 
+        className={`fixed right-0 top-0 h-full bg-slate-950 border-l border-white/10 shadow-[-20px_0_60px_rgba(0,0,0,0.5)] transition-transform duration-300 z-40 flex flex-col w-80 md:w-96 ${
+          isChatOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="p-5 border-b border-white/10 flex justify-between items-center bg-indigo-950/30">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-sm">GeoChat AI</h3>
+              <div className="text-[10px] text-indigo-400 font-mono flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Ready
+              </div>
+            </div>
+          </div>
+          <button onClick={() => setIsChatOpen(false)} className="text-slate-400 hover:text-white p-1">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {messages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[85%] rounded-2xl p-3 text-sm ${
+                msg.role === 'user' 
+                  ? 'bg-indigo-600 text-white rounded-tr-none' 
+                  : 'bg-slate-800 text-slate-200 border border-white/5 rounded-tl-none'
+              }`}>
+                {msg.text}
               </div>
             </div>
           ))}
-
+          <div ref={chatEndRef} />
         </div>
-      </main>
+
+        <div className="p-4 border-t border-white/10 bg-slate-900">
+          <form onSubmit={handleSendMessage} className="relative">
+            <input 
+              type="text" 
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Ask about a time period..."
+              className="w-full bg-slate-950 border border-white/10 rounded-full py-3 pl-4 pr-12 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+            <button 
+              type="submit"
+              disabled={!chatInput.trim()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-indigo-600 text-white disabled:opacity-50 disabled:bg-slate-700"
+            >
+              <Send className="w-4 h-4 ml-0.5" />
+            </button>
+          </form>
+        </div>
+      </div>
 
       {/* --- THE PERIOD INSPECTOR MODAL --- */}
       {selectedPeriod && (
@@ -175,12 +309,12 @@ export default function TimeScale() {
             onClick={(e) => e.stopPropagation()}
           >
             
-            {/* Modal Header */}
             <div className="p-8 border-b border-white/10 relative overflow-hidden">
               <div 
                 className="absolute inset-0 opacity-20"
                 style={{ backgroundColor: selectedPeriod.color }}
               ></div>
+              
               <button 
                 onClick={() => setSelectedPeriod(null)}
                 className="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-slate-400 hover:text-white hover:bg-red-500/50 transition-all cursor-pointer"
@@ -189,8 +323,17 @@ export default function TimeScale() {
               </button>
               
               <div className="relative z-10">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-2">
-                  {selectedPeriod.eon} EON • {selectedPeriod.era} ERA
+                <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-2 flex justify-between items-center">
+                  <span>{selectedPeriod.eon} EON • {selectedPeriod.era} ERA</span>
+                  
+                  {/* NEW: Ask AI Button inside Modal */}
+                  <button 
+                    onClick={() => askAIAboutPeriod(selectedPeriod.name)}
+                    className="flex items-center gap-1.5 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 hover:text-indigo-200 px-3 py-1.5 rounded-lg transition-colors border border-indigo-500/30"
+                  >
+                    <Sparkles className="w-3 h-3" /> Ask AI About {selectedPeriod.name}
+                  </button>
+
                 </div>
                 <h2 className="text-4xl font-display font-black text-white mb-2">{selectedPeriod.name}</h2>
                 <div className="font-mono text-sm text-blue-300 bg-black/40 inline-block px-3 py-1.5 rounded-lg border border-white/10">
@@ -200,15 +343,12 @@ export default function TimeScale() {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-8 bg-slate-900/80">
               <p className="text-lg text-slate-300 leading-relaxed mb-8">
                 {selectedPeriod.desc}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                {/* Fossil Card */}
                 <div className="bg-slate-950 border border-white/5 rounded-xl p-5">
                   <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-2">
                     <Target className="w-4 h-4 text-emerald-400" /> Index Fossils
@@ -218,7 +358,6 @@ export default function TimeScale() {
                   </div>
                 </div>
 
-                {/* Atmosphere Card */}
                 <div className="bg-slate-950 border border-white/5 rounded-xl p-5">
                   <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-2">
                     <Wind className="w-4 h-4 text-blue-400" /> Atmospheric O₂
@@ -229,7 +368,6 @@ export default function TimeScale() {
                   </div>
                 </div>
 
-                {/* Extinction Card */}
                 <div className="bg-slate-950 border border-white/5 rounded-xl p-5">
                   <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-2">
                     <Skull className="w-4 h-4 text-red-400" /> Extinction Events
@@ -238,7 +376,6 @@ export default function TimeScale() {
                     {selectedPeriod.extinction}
                   </div>
                 </div>
-
               </div>
             </div>
 
