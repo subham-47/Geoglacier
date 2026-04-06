@@ -239,9 +239,19 @@ export default function MineralDatabase() {
               </div>
 
               <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-3 mb-6">
                 <div className="font-mono text-sm text-blue-300 bg-blue-950/30 inline-block px-3 py-1.5 rounded-md border border-blue-500/10">
                   {m.chemistry.formula}
                 </div>
+                {/* Dynamically parsed chemistry display from our Regex Engine! */}
+                <div className="flex gap-1">
+                  {Object.entries(parseChemicalFormula(m.chemistry.formula)).map(([el, qty]) => (
+                    <span key={el} className="text-[9px] font-mono font-bold text-slate-400 bg-slate-800/50 px-1.5 py-0.5 rounded border border-white/5">
+                      {el}<span className="text-blue-500">{qty > 1 ? qty : ''}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
                 {/* Dynamically parsed chemistry display from our Regex Engine! */}
                 <div className="flex gap-1">
                   {Object.entries(parseChemicalFormula(m.chemistry.formula)).map(([el, qty]) => (
