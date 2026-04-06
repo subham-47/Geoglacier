@@ -1,154 +1,215 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Search, Database, Activity, Gem, Layers } from 'lucide-react';
+import { ChevronLeft, FlaskConical, Microscope, Layers, Activity } from 'lucide-react';
 
-// --- MOCK MINERAL DATA ---
-const MINERAL_DATA = [
-  { id: '1', name: 'Quartz', formula: 'SiO₂', group: 'Silicates', system: 'Hexagonal', hardness: '7', streak: 'White', color: 'Colorless, variable', desc: 'The second most abundant mineral in Earth\'s continental crust.' },
-  { id: '2', name: 'Pyrite', formula: 'FeS₂', group: 'Sulfides', system: 'Isometric', hardness: '6 - 6.5', streak: 'Greenish black', color: 'Pale brass yellow', desc: 'Known as "Fool\'s Gold" due to its metallic luster and pale brass-yellow hue.' },
-  { id: '3', name: 'Hematite', formula: 'Fe₂O₃', group: 'Oxides', system: 'Trigonal', hardness: '5.5 - 6.5', streak: 'Red to reddish brown', color: 'Steel grey to blood red', desc: 'One of the most important ores of iron, widely found in sedimentary rocks.' },
-  { id: '4', name: 'Calcite', formula: 'CaCO₃', group: 'Carbonates', system: 'Trigonal', hardness: '3', streak: 'White', color: 'Colorless or white', desc: 'A major component of limestone and marble, known for high birefringence.' },
-  { id: '5', name: 'Orthoclase', formula: 'KAlSi₃O₈', group: 'Silicates', system: 'Monoclinic', hardness: '6', streak: 'White', color: 'White, pink, pale yellow', desc: 'A typical tectosilicate mineral that forms igneous rock.' },
-  { id: '6', name: 'Gold', formula: 'Au', group: 'Native Elements', system: 'Isometric', hardness: '2.5 - 3', streak: 'Yellow', color: 'Golden yellow', desc: 'A highly sought-after precious metal, extremely malleable and ductile.' },
-  { id: '7', name: 'Olivine', formula: '(Mg,Fe)₂SiO₄', group: 'Silicates', system: 'Orthorhombic', hardness: '6.5 - 7', streak: 'Colorless', color: 'Olive green', desc: 'A primary component of the Earth\'s upper mantle.' },
-  { id: '8', name: 'Fluorite', formula: 'CaF₂', group: 'Halides', system: 'Isometric', hardness: '4', streak: 'White', color: 'Purple, green, yellow', desc: 'Often highly fluorescent under ultraviolet light.' }
+// --- 1. THE NEW ONTOLOGY (KNOWLEDGE GRAPH) ---
+const KNOWLEDGE_GRAPH = [
+  {
+    id: 'min-01',
+    name: 'Quartz',
+    class: 'Silicate',
+    subclass: 'Tectosilicate',
+    chemistry: { elements: ['Si', 'O'], formula: 'SiO₂' },
+    structure: { system: 'Trigonal' },
+    physical: { hardness: { min: 7, max: 7 }, cleavage: 'None', sg: 2.65 },
+    optical: { birefringence: 0.009, relief: 'Low positive', extinction: 'Undulose (often)' },
+    genesis: ['Igneous', 'Metamorphic', 'Sedimentary']
+  },
+  {
+    id: 'min-02',
+    name: 'Forsterite (Olivine)',
+    class: 'Silicate',
+    subclass: 'Nesosilicate',
+    chemistry: { elements: ['Mg', 'Si', 'O'], formula: 'Mg₂SiO₄' },
+    structure: { system: 'Orthorhombic' },
+    physical: { hardness: { min: 6.5, max: 7 }, cleavage: 'Imperfect', sg: 3.27 },
+    optical: { birefringence: 0.035, relief: 'High positive', extinction: 'Parallel' },
+    genesis: ['Igneous (Ultramafic)']
+  },
+  {
+    id: 'min-03',
+    name: 'Almandine (Garnet)',
+    class: 'Silicate',
+    subclass: 'Nesosilicate',
+    chemistry: { elements: ['Fe', 'Al', 'Si', 'O'], formula: 'Fe₃Al₂(SiO₄)₃' },
+    structure: { system: 'Isometric' },
+    physical: { hardness: { min: 7, max: 7.5 }, cleavage: 'None', sg: 4.32 },
+    optical: { birefringence: 0.000, relief: 'Very High positive', extinction: 'Isotropic (Always dark)' },
+    genesis: ['Metamorphic (Pelitic)']
+  },
+  {
+    id: 'min-04',
+    name: 'Calcite',
+    class: 'Carbonate',
+    subclass: 'Anhydrous Carbonate',
+    chemistry: { elements: ['Ca', 'C', 'O'], formula: 'CaCO₃' },
+    structure: { system: 'Trigonal' },
+    physical: { hardness: { min: 3, max: 3 }, cleavage: 'Perfect rhombohedral', sg: 2.71 },
+    optical: { birefringence: 0.172, relief: 'Variable (Twinkling)', extinction: 'Symmetrical' },
+    genesis: ['Sedimentary', 'Hydrothermal']
+  }
 ];
 
-const CATEGORIES = ['All', 'Silicates', 'Oxides', 'Sulfides', 'Carbonates', 'Halides', 'Native Elements'];
-
 export default function MineralDatabase() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState('All');
+  // --- 2. THE REASONING ENGINE STATE ---
+  const [filters, setFilters] = useState<{
+    elements: string[];
+    system: string;
+    minHardness: number;
+  }>({
+    elements: [],
+    system: 'All',
+    minHardness: 0
+  });
 
-  // Filter logic: matches search text AND selected category
-  const filteredMinerals = useMemo(() => {
-    return MINERAL_DATA.filter(mineral => {
-      const matchesSearch = mineral.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            mineral.formula.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesGroup = selectedGroup === 'All' || mineral.group === selectedGroup;
-      return matchesSearch && matchesGroup;
+  // --- 3. CONSTRAINT SOLVER ---
+  const filteredResults = useMemo(() => {
+    return KNOWLEDGE_GRAPH.filter(m => {
+      // Logic A: Elements (If any selected, mineral MUST contain all of them)
+      const elMatch = filters.elements.length === 0 || 
+        filters.elements.every(e => m.chemistry.elements.includes(e));
+      
+      // Logic B: Crystal System
+      const sysMatch = filters.system === 'All' || m.structure.system === filters.system;
+      
+      // Logic C: Mohs Hardness
+      const hardMatch = m.physical.hardness.min >= filters.minHardness;
+
+      return elMatch && sysMatch && hardMatch;
     });
-  }, [searchQuery, selectedGroup]);
+  }, [filters]);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-50 font-body selection:bg-blue-500/30">
+    <div className="flex h-screen bg-[#020617] text-slate-200 font-body overflow-hidden">
       
-      {/* Background Glow */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[120px]" />
-      </div>
-
-      {/* Navigation */}
-      <nav className="relative z-10 px-8 py-6 flex items-center border-b border-white/5 bg-[#020617]/50 backdrop-blur-md">
-        <Link 
-          to="/" 
-          className="flex items-center gap-2 text-sm font-mono uppercase tracking-widest text-slate-400 hover:text-white transition-colors group"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Main
-        </Link>
-      </nav>
-
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-12">
+      {/* LEFT PANEL: The Constraint Facets */}
+      <aside className="w-80 border-r border-white/10 p-6 overflow-y-auto space-y-8 bg-slate-950 flex flex-col shadow-2xl z-10">
         
-        {/* Header section */}
-        <header className="mb-12">
-          <div className="flex items-center gap-3 mb-4 text-blue-500">
-            <Database className="w-6 h-6" />
-            <span className="font-mono text-xs uppercase tracking-[0.3em]">Reference Library</span>
-          </div>
-          <h1 className="font-display text-4xl md:text-5xl font-black mb-4">Mineral <span className="text-blue-400">Database</span></h1>
-          <p className="text-slate-400 max-w-2xl leading-relaxed">
-            Search and filter through our comprehensive catalog of minerals. Explore their chemical formulas, crystal systems, and physical properties.
-          </p>
-        </header>
+        <nav className="mb-4">
+          <Link to="/" className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
+            <ChevronLeft className="w-4 h-4" /> Back to Hub
+          </Link>
+        </nav>
 
-        {/* Search and Filter Controls */}
-        <div className="mb-12 space-y-6">
-          {/* Search Bar */}
-          <div className="relative max-w-xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-            <input 
-              type="text" 
-              placeholder="Search by mineral name or formula (e.g., Quartz, SiO₂)..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all"
-            />
-          </div>
+        <div>
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-blue-500 mb-1">System Constraints</h2>
+          <h3 className="text-xl font-display font-bold">Query Engine</h3>
+        </div>
 
-          {/* Category Pills */}
+        {/* Facet: Chemistry */}
+        <div>
+          <label className="text-sm font-bold flex items-center gap-2 mb-3 text-slate-300">
+            <FlaskConical className="w-4 h-4 text-blue-400" /> Elemental Intersection
+          </label>
           <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map(category => (
+            {['Si', 'O', 'Mg', 'Fe', 'Ca', 'Al', 'C'].map(el => (
               <button
-                key={category}
-                onClick={() => setSelectedGroup(category)}
-                className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-all border ${
-                  selectedGroup === category 
-                    ? 'bg-blue-500/20 text-blue-300 border-blue-500/50' 
-                    : 'bg-white/5 text-slate-400 border-white/5 hover:bg-white/10 hover:text-slate-200'
+                key={el}
+                onClick={() => {
+                  const next = filters.elements.includes(el)
+                    ? filters.elements.filter(e => e !== el)
+                    : [...filters.elements, el];
+                  setFilters({...filters, elements: next});
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all border ${
+                  filters.elements.includes(el) 
+                    ? 'bg-blue-600/20 border-blue-500 text-blue-400' 
+                    : 'bg-white/5 border-white/10 text-slate-400 hover:border-slate-500'
                 }`}
               >
-                {category}
+                {el}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Results Grid */}
-        {filteredMinerals.length === 0 ? (
-          <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10 border-dashed">
-            <Database className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-xl font-display font-bold text-slate-300 mb-2">No minerals found</h3>
-            <p className="text-slate-500">Try adjusting your search or category filter.</p>
+        {/* Facet: Structure */}
+        <div>
+          <label className="text-sm font-bold flex items-center gap-2 mb-3 text-slate-300">
+            <Layers className="w-4 h-4 text-indigo-400" /> Crystal Symmetry
+          </label>
+          <select 
+            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+            onChange={(e) => setFilters({...filters, system: e.target.value})}
+          >
+            <option value="All">All Systems</option>
+            <option value="Isometric">Isometric</option>
+            <option value="Trigonal">Trigonal</option>
+            <option value="Orthorhombic">Orthorhombic</option>
+          </select>
+        </div>
+
+        {/* Facet: Hardness Slider */}
+        <div>
+          <label className="text-sm font-bold flex items-center gap-2 mb-3 text-slate-300">
+            <Activity className="w-4 h-4 text-amber-400" /> Mohs Hardness ($H$)
+          </label>
+          <input 
+            type="range" min="0" max="10" step="0.5" value={filters.minHardness}
+            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+            onChange={(e) => setFilters({...filters, minHardness: parseFloat(e.target.value)})}
+          />
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-[10px] text-slate-500 font-mono">Talc</span>
+            <span className="text-xs text-amber-400 font-mono font-bold">H ≥ {filters.minHardness}</span>
+            <span className="text-[10px] text-slate-500 font-mono">Diamond</span>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredMinerals.map(mineral => (
-              <div key={mineral.id} className="group bg-slate-900/50 border border-white/10 rounded-2xl p-6 hover:border-blue-500/30 hover:bg-slate-800/50 transition-all hover:-translate-y-1">
-                
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-display text-xl font-bold text-slate-100 group-hover:text-blue-400 transition-colors">{mineral.name}</h3>
-                    <div className="font-mono text-sm text-blue-300 mt-1">{mineral.formula}</div>
-                  </div>
-                  <span className="px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[10px] font-mono uppercase tracking-widest text-slate-400">
-                    {mineral.group}
-                  </span>
+        </div>
+      </aside>
+
+      {/* RIGHT PANEL: The Exploration Grid */}
+      <main className="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top_right,#0f172a,#020617)] p-8 md:p-12">
+        <header className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-display font-black mb-3">Ontology <span className="text-blue-500">Explorer</span></h1>
+          <p className="text-slate-400 text-sm flex items-center gap-3">
+            Intersecting <strong className="text-white bg-white/10 px-2 py-0.5 rounded">{filteredResults.length}</strong> geological nodes based on active constraints.
+          </p>
+        </header>
+
+        {/* The Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {filteredResults.map(m => (
+            <div key={m.id} className="relative p-6 rounded-2xl border border-white/5 bg-slate-900/40 backdrop-blur-sm hover:border-blue-500/30 hover:bg-slate-900/60 transition-all group cursor-pointer">
+              
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-display font-bold text-white mb-1">{m.name}</h3>
+                  <div className="text-[10px] uppercase tracking-widest text-slate-500">{m.class} • {m.subclass}</div>
                 </div>
-
-                <p className="text-sm text-slate-400 leading-relaxed mb-6 h-16 line-clamp-3">
-                  {mineral.desc}
-                </p>
-
-                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm border-t border-white/10 pt-4">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-1">
-                      <Activity className="w-3.5 h-3.5" /> Hardness
-                    </div>
-                    <div className="font-medium text-slate-200">{mineral.hardness}</div>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-1">
-                      <Gem className="w-3.5 h-3.5" /> System
-                    </div>
-                    <div className="font-medium text-slate-200">{mineral.system}</div>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-1">
-                      <Layers className="w-3.5 h-3.5" /> Streak
-                    </div>
-                    <div className="font-medium text-slate-200 truncate" title={mineral.streak}>{mineral.streak}</div>
-                  </div>
+                <div className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded">
+                  {m.structure.system}
                 </div>
-
               </div>
-            ))}
-          </div>
-        )}
 
+              <div className="font-mono text-sm text-blue-300 bg-blue-950/30 inline-block px-3 py-1.5 rounded-md border border-blue-500/10 mb-6">
+                {m.chemistry.formula}
+              </div>
+
+              {/* Optical Snapshot (Preview for Step 2) */}
+              <div className="pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5"><Microscope className="w-3 h-3"/> Relief</div>
+                  <div className="text-xs text-slate-300">{m.optical.relief}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1.5"><Activity className="w-3 h-3"/> Hardness</div>
+                  <div className="text-xs text-slate-300">{m.physical.hardness.min}</div>
+                </div>
+              </div>
+
+            </div>
+          ))}
+
+          {filteredResults.length === 0 && (
+            <div className="col-span-full py-20 text-center border border-dashed border-white/10 rounded-2xl">
+              <FlaskConical className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+              <p className="text-slate-400">No minerals match this specific intersection.</p>
+              <button onClick={() => setFilters({elements: [], system: 'All', minHardness: 0})} className="mt-4 text-xs text-blue-400 hover:text-blue-300">Clear Constraints</button>
+            </div>
+          )}
+        </div>
       </main>
+
     </div>
   );
 }
