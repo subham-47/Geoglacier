@@ -145,7 +145,7 @@ export default function MineralDatabase() {
         {/* Facet: Hardness Slider */}
         <div>
           <label className="text-sm font-bold flex items-center gap-2 mb-3 text-slate-300">
-            <Activity className="w-4 h-4 text-amber-400" /> Mohs Hardness ($H$)
+            <Activity className="w-4 h-4 text-amber-400" /> Mohs Hardness (H)
           </label>
           <input 
             type="range" min="0" max="10" step="0.5" value={filters.minHardness}
