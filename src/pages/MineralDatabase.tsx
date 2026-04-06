@@ -179,9 +179,13 @@ export default function MineralDatabase() {
             onChange={(e) => setFilters({...filters, system: e.target.value})}
           >
             <option value="All">All Systems</option>
-            <option value="Isometric">Isometric</option>
-            <option value="Trigonal">Trigonal</option>
+            <option value="Isometric">Isometric (Cubic)</option>
+            <option value="Tetragonal">Tetragonal</option>
             <option value="Orthorhombic">Orthorhombic</option>
+            <option value="Hexagonal">Hexagonal</option>
+            <option value="Trigonal">Trigonal</option>
+            <option value="Monoclinic">Monoclinic</option>
+            <option value="Triclinic">Triclinic</option>
           </select>
         </div>
 
