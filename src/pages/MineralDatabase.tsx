@@ -38,14 +38,19 @@ const KNOWLEDGE_GRAPH = [
   },
   {
     id: 'min-02',
-    name: 'Forsterite (Olivine)',
+    name: 'Olivine (Solid Solution)',
     class: 'Silicate',
     subclass: 'Nesosilicate',
-    chemistry: { elements: ['Mg', 'Si', 'O'], formula: 'Mg₂SiO₄' },
+    isSeries: true,
+    series: {
+      memberA: { name: 'Forsterite', symbol: 'Fo', element: 'Mg', sg: 3.22, bi: 0.035 },
+      memberB: { name: 'Fayalite', symbol: 'Fa', element: 'Fe', sg: 4.39, bi: 0.052 }
+    },
+    chemistry: { elements: ['Mg', 'Fe', 'Si', 'O'], formula: '(Mg,Fe)₂SiO₄' },
     structure: { system: 'Orthorhombic' },
     physical: { hardness: { min: 6.5, max: 7 }, cleavage: 'Imperfect', sg: 3.27 },
     optical: { birefringence: 0.035, relief: 'High positive', extinction: 'Parallel' },
-    genesis: ['Igneous (Ultramafic)']
+    genesis: ['Igneous (Ultramafic)', 'Mantle']
   },
   {
     id: 'min-03',
@@ -84,6 +89,7 @@ export default function MineralDatabase() {
   });
   // State for the Optical Inspector Modal
   const [selectedMineral, setSelectedMineral] = useState<any | null>(null);
+  const [seriesValue, setSeriesValue] = useState(0); // For Solid Solution Slider (0-100)
 
   // State for Smart Chemical Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -334,7 +340,47 @@ export default function MineralDatabase() {
             <div className="w-full md:w-3/5 p-8 bg-slate-900/50 overflow-y-auto">
               <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-2">{selectedMineral.class} • {selectedMineral.subclass}</div>
               <h2 className="text-3xl font-display font-black text-white mb-1">{selectedMineral.name}</h2>
-              <div className="font-mono text-sm text-blue-400 mb-8">{selectedMineral.chemistry.formula}</div>
+              <div className="font-mono text-sm text-blue-400 mb-6">{selectedMineral.chemistry.formula}</div>
+
+              {/* --- DYNAMIC SOLID SOLUTION SIMULATOR --- */}
+              {selectedMineral.isSeries && (
+                <div className="mb-8 p-5 bg-slate-950/50 border border-white/10 rounded-xl shadow-inner">
+                  <div className="flex justify-between items-center mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <span>{selectedMineral.series.memberA.name} ({selectedMineral.series.memberA.symbol})</span>
+                    <span>{selectedMineral.series.memberB.name} ({selectedMineral.series.memberB.symbol})</span>
+                  </div>
+                  
+                  <input 
+                    type="range" min="0" max="100" value={seriesValue}
+                    onChange={(e) => setSeriesValue(parseInt(e.target.value))}
+                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500 mb-4"
+                  />
+                  
+                  <div className="grid grid-cols-3 gap-4 text-center text-xs font-mono text-slate-400 border-t border-white/5 pt-4 mt-2">
+                    <div>
+                      <span className="block text-[9px] text-slate-500 uppercase mb-1">Exact Formula</span>
+                      <span className="text-blue-300">
+                        ({selectedMineral.series.memberA.element}
+                        <sub className="text-[9px]">{(1 - seriesValue/100).toFixed(2)}</sub>
+                        {selectedMineral.series.memberB.element}
+                        <sub className="text-[9px]">{(seriesValue/100).toFixed(2)}</sub>)₂SiO₄
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] text-slate-500 uppercase mb-1">Density (SG)</span>
+                      <span className="text-white">
+                        {((selectedMineral.series.memberA.sg * (1 - seriesValue/100)) + (selectedMineral.series.memberB.sg * (seriesValue/100))).toFixed(2)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] text-slate-500 uppercase mb-1">Birefringence</span>
+                      <span className="text-white">
+                        {((selectedMineral.series.memberA.bi * (1 - seriesValue/100)) + (selectedMineral.series.memberB.bi * (seriesValue/100))).toFixed(3)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
