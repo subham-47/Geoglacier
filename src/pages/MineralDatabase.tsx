@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, FlaskConical, Microscope, Layers, Activity, Search } from 'lucide-react';
+import { ChevronLeft, FlaskConical, Microscope, Layers, Activity, Search, Scale } from 'lucide-react';
 
 // --- INTELLIGENCE: The Chemical Parser ---
 const parseChemicalFormula = (formula: string) => {
@@ -91,6 +91,9 @@ export default function MineralDatabase() {
 
   // State for Smart Chemical Search
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // State for Compare Mode
+  const [compareQueue, setCompareQueue] = useState<any[]>([]);
 
   // --- 3. CONSTRAINT SOLVER ---
   const filteredResults = useMemo(() => {
@@ -236,8 +239,27 @@ export default function MineralDatabase() {
                   <h3 className="text-xl font-display font-bold text-white mb-1">{m.name}</h3>
                   <div className="text-[10px] uppercase tracking-widest text-slate-500">{m.class} • {m.subclass}</div>
                 </div>
-                <div className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded">
-                  {m.structure.system}
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevents the main modal from opening
+                      if (compareQueue.find(c => c.id === m.id)) {
+                        setCompareQueue(compareQueue.filter(c => c.id !== m.id)); // Deselect
+                      } else if (compareQueue.length < 2) {
+                        setCompareQueue([...compareQueue, m]); // Select
+                      }
+                    }}
+                    className={`text-[10px] font-mono font-bold px-2 py-1 rounded transition-colors ${
+                      compareQueue.find(c => c.id === m.id) 
+                        ? 'bg-amber-500 text-amber-950 hover:bg-amber-400' 
+                        : 'text-slate-400 bg-white/5 border border-white/10 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {compareQueue.find(c => c.id === m.id) ? 'Selected' : 'Compare +'}
+                  </button>
+                  <div className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded">
+                    {m.structure.system}
+                  </div>
                 </div>
               </div>
 
@@ -413,6 +435,71 @@ export default function MineralDatabase() {
                   </div>
                 </div>
               </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* --- STEP 5: COMPARE MODE TOAST & MODAL --- */}
+      {/* Toast Notification when 1 is selected */}
+      {compareQueue.length === 1 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 bg-amber-500 text-amber-950 px-6 py-3 rounded-full font-bold shadow-[0_0_40px_rgba(245,158,11,0.3)] animate-in slide-in-from-bottom-5">
+          Select 1 more mineral to compare...
+        </div>
+      )}
+
+      {/* The Side-by-Side Compare Modal */}
+      {compareQueue.length === 2 && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-[#020617]/90 backdrop-blur-xl">
+          <div className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+            
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/50">
+              <h2 className="text-xl font-display font-bold flex items-center gap-3 text-white">
+                <Scale className="w-5 h-5 text-amber-400" /> Diagnostic Comparison
+              </h2>
+              <button onClick={() => setCompareQueue([])} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-slate-400 hover:text-white hover:bg-red-500/50 transition-all">✕</button>
+            </div>
+
+            <div className="grid grid-cols-2 divide-x divide-white/10">
+              {compareQueue.map((m, idx) => {
+                const other = compareQueue[idx === 0 ? 1 : 0]; // Grab the *other* mineral to compare against
+                return (
+                  <div key={m.id} className="p-8 bg-slate-900/50">
+                    <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">{m.class}</div>
+                    <h3 className="text-3xl font-display font-black text-white mb-2">{m.name}</h3>
+                    <div className="font-mono text-sm text-blue-400 mb-8">{m.chemistry.formula}</div>
+
+                    <ul className="space-y-4 text-sm text-slate-400">
+                      <li className="flex justify-between border-b border-white/5 pb-2">
+                        <span>Hardness (H)</span> 
+                        {/* Auto-colors Green if higher, Red if lower! */}
+                        <strong className={`font-mono ${m.physical.hardness.min > other.physical.hardness.min ? 'text-green-400' : m.physical.hardness.min < other.physical.hardness.min ? 'text-red-400' : 'text-white'}`}>
+                          {m.physical.hardness.min}
+                        </strong>
+                      </li>
+                      <li className="flex justify-between border-b border-white/5 pb-2">
+                        <span>Specific Gravity</span> 
+                        <strong className={`font-mono ${m.physical.sg > other.physical.sg ? 'text-green-400' : m.physical.sg < other.physical.sg ? 'text-red-400' : 'text-white'}`}>
+                          {m.physical.sg}
+                        </strong>
+                      </li>
+                      <li className="flex justify-between border-b border-white/5 pb-2">
+                        <span>Crystal System</span> 
+                        <strong className={`${m.structure.system !== other.structure.system ? 'text-amber-400' : 'text-white'}`}>
+                          {m.structure.system}
+                        </strong>
+                      </li>
+                      <li className="flex justify-between pt-2">
+                        <span>Cleavage</span> 
+                        <strong className={`${m.physical.cleavage !== other.physical.cleavage ? 'text-amber-400' : 'text-white'}`}>
+                          {m.physical.cleavage}
+                        </strong>
+                      </li>
+                    </ul>
+                  </div>
+                );
+              })}
             </div>
 
           </div>
